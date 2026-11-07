@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Laboratorio virtual de estadística aplicada a la administración del presupuesto personal de estudiantes universitarios. Datos sintéticos en córdobas y dólares con fines educativos.">
+<meta name="theme-color" content="#245B70" id="themeColorMeta">
+<title>Laboratorio de Estadística | Presupuesto personal universitario</title>
+<script>
+try{
+  if(localStorage.getItem('presupuesto-tema') === 'oscuro') document.documentElement.setAttribute('data-theme','dark');
+}catch(e){}
+</script>
+<style>
+:root{
+  --bg:#F8FAFC; --card:#FFFFFF; --primary:#245B70; --primary-dark:#1B4758;
+  --secondary:#6B9B83; --secondary-dark:#527D68; --accent:#F2C66D;
+  --text:#263238; --muted:#64748B; --border:#E2E8F0;
+  --soft:#EEF4F6; --soft-sage:#EFF5F1; --soft-yellow:#FDF6E3;
+  --warn:#8A5A12; --warn-bg:#FEF3C7; --neg:#B42318; --pos:#2F6B4F;
+  --ink:#245B70; --header-bg:#245B70;
+  --chart-blue:#245B70; --chart-green:#6B9B83;
+  --table-head:#EDF4F6; --table-head-hover:#E2EEF1;
+  --row-border:#F1F5F9; --row-alt:#FBFDFE; --row-hover:#F2F8FA;
+  --shadow:0 2px 12px rgba(36,91,112,.07), 0 1px 3px rgba(0,0,0,.04);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6;font-size:16px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+img,canvas{max-width:100%}
+a{color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.hidden{display:none!important}
+.neg{color:var(--neg);font-weight:600}
+.pos{color:var(--pos);font-weight:600}
+.nowrap{white-space:nowrap}
+
+/* Header */
+.site-header{position:sticky;top:0;z-index:100;background:var(--header-bg);color:#fff;box-shadow:0 3px 14px rgba(15,45,58,.18)}
+.header-inner{max-width:1240px;margin:0 auto;padding:.85rem 1.25rem .7rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.75rem;min-width:0}
+.brand-mark{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:var(--accent);color:#3B2C06;font-weight:800;font-size:1.35rem;flex:0 0 auto}
+.brand h1{font-size:1.03rem;line-height:1.25;font-weight:700;letter-spacing:.01em}
+.brand p{font-size:.78rem;color:#D8E8EE;margin-top:.1rem}
+nav{display:flex;gap:.25rem;flex-wrap:wrap;justify-content:flex-end}
+.nav-btn{background:transparent;border:1px solid transparent;color:#E8F1F4;padding:.4rem .62rem;border-radius:7px;font-size:.82rem;font-weight:600;transition:background .18s,border-color .18s}
+.nav-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22)}
+.nav-btn.active{background:var(--secondary);border-color:var(--secondary);color:#fff}
+.theme-toggle{border-color:rgba(242,198,109,.55);color:var(--accent);display:inline-flex;align-items:center;gap:.32rem;margin-left:.2rem}
+.theme-toggle:hover{background:rgba(242,198,109,.16);border-color:var(--accent)}
+.theme-icon{font-size:.95rem;line-height:1}
+.nav-btn:focus-visible,.btn:focus-visible,th.sortable:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Layout */
+main{max-width:1240px;margin:0 auto;padding:1.6rem 1.25rem 3rem}
+.section{display:none;animation:fadeIn .28s ease;scroll-margin-top:135px}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-head{margin:.2rem 0 1.2rem}
+.eyebrow{display:inline-block;color:var(--secondary-dark);font-weight:700;font-size:.74rem;letter-spacing:.11em;text-transform:uppercase;margin-bottom:.2rem}
+.section-head h2{color:var(--ink);font-size:clamp(1.45rem,2.6vw,1.95rem);line-height:1.2}
+.section-head p{color:var(--muted);max-width:900px;margin-top:.45rem;font-size:.94rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.35rem;box-shadow:var(--shadow);margin-bottom:1.25rem}
+.card h3{color:var(--ink);font-size:1.08rem;margin-bottom:.8rem;line-height:1.3}
+.card h4{color:var(--ink);font-size:.95rem}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}
+.grid-2>*,.grid-3>*,.charts-grid>*{min-width:0}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.85rem}
+.card-head h3{margin-bottom:0}
+.card-head p{color:var(--muted);font-size:.84rem;margin-top:.2rem}
+.lead{font-size:1.02rem;color:#E5F0F4;max-width:760px}
+
+/* Hero */
+.hero{background:var(--primary);border:0;color:#fff;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(230px,.7fr);gap:1.5rem;padding:2rem;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-80px;top:-110px;width:280px;height:280px;border-radius:50%;background:rgba(242,198,109,.13);pointer-events:none}
+.hero .eyebrow{color:var(--accent)}
+.hero h2{color:#fff;font-size:clamp(1.6rem,3.4vw,2.35rem);line-height:1.16;margin:.15rem 0 .65rem;max-width:850px}
+.hero-actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.15rem;position:relative;z-index:1}
+.hero-aside{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:1rem;align-self:center;position:relative;z-index:1}
+.hero-aside .hero-stat{font-size:2rem;font-weight:800;color:var(--accent);line-height:1}
+.hero-aside small{color:#D8E8EE;display:block;margin-top:.2rem}
+.hero-aside p{font-size:.82rem;color:#D8E8EE;margin-top:.8rem;border-top:1px solid rgba(255,255,255,.2);padding-top:.75rem}
+.badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.badge{display:inline-flex;align-items:center;gap:.3rem;border-radius:999px;padding:.2rem .6rem;font-size:.72rem;font-weight:600;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff}
+.badge.light{background:var(--soft);border-color:var(--border);color:var(--ink)}
+.badge.sage{background:var(--soft-sage);border-color:#CFE2D7;color:var(--secondary-dark)}
+.badge.yellow{background:var(--soft-yellow);border-color:#EFD9A0;color:#785A13}
+.badge.rate{background:rgba(242,198,109,.16);border-color:rgba(242,198,109,.6);color:#FBEDCB}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:1px solid transparent;border-radius:8px;padding:.52rem .85rem;font-size:.86rem;font-weight:700;text-decoration:none;transition:background .18s,border-color .18s,transform .12s;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-dark)}
+.btn.secondary{background:var(--secondary);color:#fff}
+.btn.secondary:hover{background:var(--secondary-dark)}
+.btn.ghost{background:var(--card);border-color:var(--border);color:var(--ink)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.accent{background:var(--accent);color:#3B2C06}
+.btn.accent:hover{background:#E9B94F}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* Controls */
+.toolbar{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:.22rem;min-width:0}
+.field.grow{flex:1 1 220px}
+.field label,.toolbar label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input[type="text"],input[type="number"],input[type="search"],select{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:.48rem .6rem;color:var(--text);font-size:.87rem;min-height:38px}
+input:focus,select:focus{outline:2px solid rgba(107,155,131,.45);border-color:var(--secondary)}
+.field-inline{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.field-inline select{width:auto;min-width:175px;max-width:260px}
+.toolbar-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-left:auto}
+.filter-summary{margin-top:.85rem;font-size:.82rem;color:var(--muted);display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.filter-chip{background:var(--soft);border:1px solid var(--border);border-radius:999px;padding:.12rem .55rem;color:var(--ink);font-size:.76rem;font-weight:600}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.75rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.85rem .9rem;min-width:0}
+.stat .label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;line-height:1.3}
+.stat .value{display:block;color:var(--ink);font-size:1.28rem;font-weight:800;line-height:1.3;margin-top:.2rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stat .hint{display:block;color:var(--muted);font-size:.72rem;margin-top:.1rem}
+.stat.highlight{border-left:4px solid var(--accent)}
+.stat.sage{border-left:4px solid var(--secondary)}
+.stat.plain{border-left:4px solid var(--primary)}
+
+/* Tables */
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px;max-height:520px;background:var(--card)}
+.table-wrap.tall{max-height:560px}
+.table-wrap.short{max-height:420px}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+caption{text-align:left;color:var(--muted);font-size:.78rem;padding:.55rem .75rem;border-bottom:1px solid var(--border)}
+thead th{position:sticky;top:0;z-index:2;background:var(--table-head);color:var(--ink);text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;padding:.55rem .65rem;border-bottom:1px solid var(--border);white-space:nowrap}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody td{padding:.45rem .65rem;border-bottom:1px solid var(--row-border);white-space:nowrap}
+tbody tr:nth-child(even){background:var(--row-alt)}
+tbody tr:hover{background:var(--row-hover)}
+.money-main{display:block;line-height:1.25}
+.money-alt{display:block;font-size:.68rem;color:var(--muted);line-height:1.2;font-weight:500;letter-spacing:.01em}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{padding:.5rem .65rem;font-weight:700;background:var(--soft);border-top:1px solid var(--border)}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{background:var(--table-head-hover)}
+.sort-arrow{color:var(--secondary-dark);font-size:.72rem;margin-left:.18rem}
+.table-note{font-size:.76rem;color:var(--muted);margin-top:.5rem}
+.low-exp{background:#FFF6DE!important}
+#codebookTable td{vertical-align:top}
+#codebookTable td:nth-child(3),#codebookTable td:nth-child(5){white-space:normal;min-width:250px}
+#codebookTable td:nth-child(4){white-space:normal;min-width:150px}
+.empty-state{padding:2rem 1rem;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:10px;background:var(--row-alt)}
+.empty-state strong{display:block;color:var(--ink);margin-bottom:.2rem}
+
+/* Questionnaire */
+.question-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:.9rem;margin-bottom:1.25rem}
+.question-card{border:1px solid var(--border);border-radius:10px;padding:.9rem;background:var(--card);position:relative}
+.question-num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--primary);color:#fff;font-size:.78rem;font-weight:800;margin-bottom:.4rem}
+.question-card h4{font-size:.92rem;line-height:1.45;margin-bottom:.5rem;color:var(--text)}
+.options{display:flex;flex-wrap:wrap;gap:.3rem}
+.option{background:var(--soft);border:1px solid var(--border);border-radius:999px;padding:.12rem .5rem;font-size:.72rem;color:var(--muted)}
+.meta{font-size:.72rem;color:var(--muted);border-top:1px dashed var(--border);padding-top:.5rem;margin-top:.7rem;line-height:1.5}
+.meta b{color:var(--ink)}
+
+/* Interpretation and callouts */
+.interpretacion{background:var(--soft-yellow);border-left:4px solid var(--accent);padding:.95rem 1rem;border-radius:0 10px 10px 0;margin-top:1rem;font-size:.9rem;color:#3E3A2C}
+.interpretacion h4{font-size:.76rem;text-transform:uppercase;letter-spacing:.07em;color:#7A5B17;margin-bottom:.3rem}
+.interpretacion p+p{margin-top:.45rem}
+.callout{background:var(--soft);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:0 10px 10px 0;padding:.9rem 1rem;font-size:.87rem;margin:1rem 0}
+.callout.warning{background:var(--warn-bg);border-color:#F0DCA7;border-left-color:var(--accent);color:#4F3B0B}
+.callout.sage{background:var(--soft-sage);border-color:#D5E5DA;border-left-color:var(--secondary)}
+.callout h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem;color:var(--ink)}
+.callout.warning h4{color:var(--warn)}
+.callout p+p{margin-top:.4rem}
+.note{font-size:.78rem;color:var(--muted);margin-top:.6rem;line-height:1.55}
+.hypothesis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;margin:.2rem 0 .9rem}
+.hypothesis div{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:.65rem .75rem;font-size:.84rem}
+.hypothesis b{color:var(--ink)}
+.equation{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;text-align:center;color:var(--ink);font-size:clamp(1.05rem,2vw,1.35rem);font-weight:800;margin:.4rem 0 1rem;overflow-wrap:anywhere}
+.equation small{display:block;font-size:.72rem;color:var(--muted);font-weight:600;margin-top:.25rem}
+
+/* Charts */
+.chart-box{border:1px solid var(--border);border-radius:10px;background:var(--card);padding:.7rem;margin-top:.85rem;position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:6px}
+.chart-legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.76rem;color:var(--muted);margin-bottom:.3rem}
+.legend-dot{display:inline-block;width:.68rem;height:.68rem;border-radius:2px;margin-right:.3rem;vertical-align:-1px}
+.charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}
+.charts-grid .card{margin-bottom:0}
+.chart-sub{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
+
+/* Misc */
+.summary-text{font-size:.92rem;color:var(--text);display:grid;gap:.5rem}
+.summary-text p{background:var(--soft);border-radius:8px;padding:.65rem .8rem;border:1px solid var(--border)}
+.summary-text strong{color:var(--ink)}
+.list-check{list-style:none;display:grid;gap:.4rem;font-size:.88rem}
+.list-check li{padding-left:1.4rem;position:relative}
+.list-check li:before{content:"✓";position:absolute;left:0;color:var(--secondary-dark);font-weight:800}
+.list-route{list-style:none;display:grid;gap:.45rem;font-size:.87rem}
+.list-route li{display:flex;gap:.55rem;align-items:flex-start}
+.route-num{width:22px;height:22px;border-radius:50%;background:var(--secondary);color:#fff;display:grid;place-items:center;font-size:.7rem;font-weight:800;flex:0 0 auto;margin-top:.1rem}
+.prediction-result{margin-top:.7rem;font-size:.88rem;background:var(--soft-sage);border:1px solid #D5E5DA;border-radius:8px;padding:.65rem .8rem;color:#2F4F3D}
+.prediction-result.warn{background:var(--warn-bg);border-color:#F0DCA7;color:#4F3B0B}
+.site-footer{max-width:1240px;margin:0 auto;padding:1.2rem 1.25rem 2.2rem;color:var(--muted);font-size:.78rem;text-align:center;border-top:1px solid var(--border)}
+#toast{position:fixed;right:1.1rem;bottom:1.1rem;z-index:300;background:var(--primary);color:#fff;padding:.7rem .95rem;border-radius:9px;box-shadow:0 8px 24px rgba(15,45,58,.25);font-size:.85rem;max-width:min(360px,90vw);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s,transform .2s}
+#toast.show{opacity:1;transform:none}
+
+/* Modo oscuro */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1418; --card:#142127; --primary:#173A48; --primary-dark:#102A34;
+  --secondary:#6B9B83; --secondary-dark:#527D68; --accent:#F2C66D;
+  --text:#E6EEF2; --muted:#9DAFB9; --border:#2A3D46;
+  --soft:#1A2A31; --soft-sage:#182A24; --soft-yellow:#2B2515;
+  --warn:#E8C477; --warn-bg:#33290F; --neg:#FF8A80; --pos:#8FD3AE;
+  --ink:#A6D3E2; --header-bg:#102A34;
+  --chart-blue:#4E90A8; --chart-green:#8FC7AB;
+  --table-head:#1C313A; --table-head-hover:#27414C;
+  --row-border:#20343D; --row-alt:#17262D; --row-hover:#1D313A;
+  --shadow:0 2px 16px rgba(0,0,0,.38), 0 1px 3px rgba(0,0,0,.35);
+}
+html[data-theme="dark"] body{background:var(--bg);color:var(--text)}
+html[data-theme="dark"] .site-header{background:var(--header-bg);box-shadow:0 3px 18px rgba(0,0,0,.45)}
+html[data-theme="dark"] .hero{background:linear-gradient(135deg,#17404F,#102A34)}
+html[data-theme="dark"] .badge.sage{background:#172A23;border-color:#2E4A3C;color:#A6CDB8}
+html[data-theme="dark"] .badge.yellow{background:#2B2515;border-color:#5A4A1C;color:#E8C477}
+html[data-theme="dark"] .interpretacion{background:var(--soft-yellow);color:#EDE3C6}
+html[data-theme="dark"] .interpretacion h4{color:#E8C477}
+html[data-theme="dark"] .callout{border-left-color:#4E90A8}
+html[data-theme="dark"] .callout.warning{background:var(--warn-bg);border-color:#5A4A1C;color:#F3E3B8}
+html[data-theme="dark"] .callout.warning h4{color:#E8C477}
+html[data-theme="dark"] .callout.sage{background:var(--soft-sage);border-color:#2E4A3C}
+html[data-theme="dark"] .prediction-result{background:var(--soft-sage);border-color:#2E4A3C;color:#CBE7D7}
+html[data-theme="dark"] .prediction-result.warn{background:var(--warn-bg);border-color:#5A4A1C;color:#F3E3B8}
+html[data-theme="dark"] .low-exp{background:#45370F!important;color:#FFE7A3}
+html[data-theme="dark"] input[type="text"],html[data-theme="dark"] input[type="number"],html[data-theme="dark"] input[type="search"],html[data-theme="dark"] select{background:#0F1D23;border-color:var(--border);color:var(--text)}
+html[data-theme="dark"] input::placeholder{color:#7E929C}
+html[data-theme="dark"] .option{background:#1B2C33;border-color:#2A3D46;color:#B7C7D0}
+html[data-theme="dark"] .question-num{background:#245B70;color:#fff}
+html[data-theme="dark"] .btn.primary{background:#2A687F;color:#fff}
+html[data-theme="dark"] .btn.primary:hover{background:#347A94}
+html[data-theme="dark"] .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--border)}
+html[data-theme="dark"] .btn.ghost:hover{background:#1B2C33}
+html[data-theme="dark"] .btn.secondary{background:#5C8B74;color:#fff}
+html[data-theme="dark"] .btn.secondary:hover{background:#6B9B83}
+html[data-theme="dark"] .filter-chip{background:#1B2C33;color:var(--ink);border-color:#2A3D46}
+html[data-theme="dark"] .equation{background:#1A2A31;border-color:#2A3D46;color:var(--ink)}
+html[data-theme="dark"] .summary-text p{background:#1A2A31;border-color:#2A3D46}
+html[data-theme="dark"] .table-wrap,html[data-theme="dark"] .chart-box,html[data-theme="dark"] .question-card{background:var(--card)}
+html[data-theme="dark"] .empty-state{background:var(--row-alt);border-color:#2A3D46}
+html[data-theme="dark"] #toast{background:#2A687F}
+html[data-theme="dark"] .stat.plain{border-left-color:#4E90A8}
+
+/* Responsive */
+@media(max-width:980px){
+  .hero{grid-template-columns:minmax(0,1fr);padding:1.5rem}
+  .charts-grid{grid-template-columns:minmax(0,1fr)}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .header-inner{padding:.7rem .85rem;align-items:flex-start}
+  .brand h1{font-size:.95rem}
+  nav{justify-content:flex-start}
+  .nav-btn{font-size:.76rem;padding:.35rem .5rem}
+  .theme-toggle{margin-left:auto}
+  main{padding:1rem .8rem 2.2rem}
+  .card{padding:1rem}
+  .grid-2,.grid-3{grid-template-columns:minmax(0,1fr)}
+  .hero h2{font-size:1.55rem}
+  .hero-actions .btn{flex:1 1 auto}
+  .toolbar-actions{margin-left:0;width:100%}
+  .toolbar-actions .btn{flex:1 1 auto}
+  .hypothesis{grid-template-columns:1fr}
+  .field-inline{width:100%}
+  .field-inline>span[aria-hidden="true"]{display:none}
+  .field-inline select{flex:1 1 140px;max-width:none}
+  .stats-grid{grid-template-columns:repeat(auto-fit,minmax(135px,1fr))}
+  .stat .value{font-size:1.12rem}
+  table{font-size:.79rem}
+  thead th,tbody td{padding:.42rem .5rem}
+}
+@media(max-width:430px){
+  .hero{padding:1.15rem}
+  .brand-mark{width:36px;height:36px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat .value{font-size:1rem}
+}
+
+/* Print */
+@media print{
+  @page{margin:14mm}
+  html[data-theme="dark"]{
+    --bg:#fff; --card:#fff; --primary:#245B70; --primary-dark:#1B4758;
+    --secondary:#6B9B83; --secondary-dark:#527D68; --accent:#F2C66D;
+    --text:#263238; --muted:#64748B; --border:#bbb;
+    --soft:#EEF4F6; --soft-sage:#EFF5F1; --soft-yellow:#FDF6E3;
+    --warn:#8A5A12; --warn-bg:#FEF3C7; --neg:#B42318; --pos:#2F6B4F;
+    --ink:#245B70; --header-bg:#245B70;
+    --table-head:#EDF4F6; --table-head-hover:#E2EEF1;
+    --row-border:#F1F5F9; --row-alt:#FBFDFE; --row-hover:#F2F8FA;
+  }
+  html[data-theme="dark"] body{background:#fff;color:#263238}
+  html[data-theme="dark"] .card,html[data-theme="dark"] .table-wrap,html[data-theme="dark"] .chart-box,
+  html[data-theme="dark"] .question-card,html[data-theme="dark"] .stat{background:#fff;border-color:#bbb}
+  html[data-theme="dark"] .hero{background:#245B70;color:#fff}
+  html[data-theme="dark"] .interpretacion{background:#FDF6E3;color:#3E3A2C}
+  html[data-theme="dark"] .interpretacion h4{color:#7A5B17}
+  html[data-theme="dark"] .callout.warning{background:#FEF3C7;border-color:#F0DCA7;color:#4F3B0B}
+  html[data-theme="dark"] .callout.warning h4{color:#8A5A12}
+  html[data-theme="dark"] .prediction-result{background:#EFF5F1;border-color:#D5E5DA;color:#2F4F3D}
+  html[data-theme="dark"] .low-exp{background:#FFF6DE!important;color:inherit}
+  body{background:#fff;font-size:11pt}
+  .site-header,nav,.toolbar,.field-inline,.btn,#toast,.site-footer,.no-print{display:none!important}
+  main{max-width:none;margin:0;padding:0}
+  .section{display:none!important}
+  .section.active{display:block!important}
+  .section-head{break-after:avoid}
+  .card{box-shadow:none;border:1px solid #bbb;break-inside:avoid;margin-bottom:10pt}
+  #pruebas .card{break-inside:auto}
+  #pruebas .grid-2{break-inside:auto}
+  .table-wrap{max-height:none;overflow:visible}
+  .interpretacion,.callout{break-inside:avoid}
+  canvas{max-width:100%}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">Σ</div>
+      <div>
+        <h1>Laboratorio de Estadística Aplicada</h1>
+        <p>Presupuesto personal universitario · Córdobas y dólares</p>
+      </div>
+    </div>
+    <nav id="mainNav" aria-label="Navegación principal">
+      <button type="button" class="nav-btn active" data-section="inicio">Inicio</button>
+      <button type="button" class="nav-btn" data-section="cuestionario">Cuestionario</button>
+      <button type="button" class="nav-btn" data-section="base">Base de datos</button>
+      <button type="button" class="nav-btn" data-section="frecuencias">Frecuencias</button>
+      <button type="button" class="nav-btn" data-section="descriptiva">Descriptiva</button>
+      <button type="button" class="nav-btn" data-section="pruebas">Pruebas</button>
+      <button type="button" class="nav-btn" data-section="regresion">Regresión</button>
+      <button type="button" class="nav-btn" data-section="graficos">Gráficos</button>
+      <button type="button" class="nav-btn" data-section="interpretaciones">Interpretaciones</button>
+      <button type="button" class="nav-btn theme-toggle" id="themeToggle" aria-pressed="false" title="Cambiar a modo oscuro">
+        <span class="theme-icon" id="themeIcon" aria-hidden="true">🌙</span><span id="themeLabel">Modo oscuro</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ============ INICIO ============ -->
+<section id="inicio" class="section active" aria-labelledby="inicioTitle">
+  <div class="hero card">
+    <div>
+      <span class="eyebrow">Ciclo 6 · Estadística aplicada a la investigación</span>
+      <h2 id="inicioTitle">¿Cómo administran su dinero los estudiantes universitarios?</h2>
+      <p class="lead">Este laboratorio virtual analiza la relación entre los ingresos, los gastos, el ahorro, el endeudamiento y los hábitos de control presupuestal de una muestra sintética de estudiantes. Todos los cálculos, tablas y gráficos se generan a partir de la base visible.</p>
+      <div class="hero-actions">
+        <button type="button" class="btn accent" data-goto="base">Explorar la base de datos</button>
+        <button type="button" class="btn ghost" data-goto="pruebas">Ver pruebas estadísticas</button>
+        <button type="button" class="btn ghost" id="btnPrintHome">Imprimir esta sección</button>
+      </div>
+      <div class="badges">
+        <span class="badge">Datos sintéticos</span>
+        <span class="badge">Fines educativos</span>
+        <span class="badge">Cálculo automático</span>
+        <span class="badge">Sin librerías externas</span>
+        <span class="badge rate">Tipo de cambio: C$ 36.62 = US$ 1</span>
+      </div>
+    </div>
+    <aside class="hero-aside">
+      <div class="hero-stat" id="heroN">64</div>
+      <small>registros disponibles</small>
+      <p>15 variables · 1 cuestionario · 6 visualizaciones · pruebas chi-cuadrado, correlación y regresión lineal.</p>
+    </aside>
+  </div>
+
+  <div class="stats-grid" aria-label="Indicadores generales de la muestra">
+    <div class="stat plain"><span class="label">Ingreso promedio</span><span class="value" id="kpiIngreso">—</span><span class="hint" id="kpiIngresoHint">C$ por mes · US$</span></div>
+    <div class="stat sage"><span class="label">Gasto promedio</span><span class="value" id="kpiGasto">—</span><span class="hint" id="kpiGastoHint">C$ por mes · US$</span></div>
+    <div class="stat highlight"><span class="label">Ahorro promedio</span><span class="value" id="kpiAhorro">—</span><span class="hint" id="kpiAhorroHint">C$ por mes · US$</span></div>
+    <div class="stat plain"><span class="label">Deuda media</span><span class="value" id="kpiDeuda">—</span><span class="hint" id="kpiDeudaHint">C$ acumulados · US$</span></div>
+    <div class="stat sage"><span class="label">Siempre presupuesta</span><span class="value" id="kpiPresupuesto">—</span><span class="hint">del total visible</span></div>
+  </div>
+
+  <div class="grid-2">
+    <article class="card">
+      <h3>Objetivo estadístico</h3>
+      <p>Determinar la existencia, dirección y magnitud de la relación entre el ingreso mensual y el ahorro mensual de los estudiantes universitarios, así como explorar la asociación entre la facultad y la frecuencia con la que utilizan un presupuesto personal. También se describen los patrones de gasto, endeudamiento y estrés financiero. Los montos se expresan en córdobas (C$) y su equivalente en dólares (US$), a razón de C$ 36.62 por US$ 1.</p>
+      <div class="callout sage">
+        <h4>Pregunta de investigación</h4>
+        <p>¿En qué medida el ingreso mensual se relaciona con el ahorro y el gasto de los estudiantes, y qué papel cumplen sus hábitos de control presupuestal?</p>
+      </div>
+    </article>
+    <article class="card">
+      <h3>Variables del estudio</h3>
+      <ul class="list-check">
+        <li><strong>Cuantitativas:</strong> edad, ingreso mensual, gasto total, alimentación, transporte, ocio, ahorro, deuda y balance.</li>
+        <li><strong>Cualitativas nominales:</strong> sexo, facultad, fuente principal de ingresos y herramienta de control.</li>
+        <li><strong>Cualitativas ordinales:</strong> semestre, uso de presupuesto y estrés financiero (escala 1–5).</li>
+      </ul>
+      <p class="note">La base contiene 64 registros simulados con fines educativos. No proviene de personas reales y no debe usarse para conclusiones sobre una población concreta.</p>
+    </article>
+  </div>
+
+  <div class="grid-2">
+    <article class="card">
+      <h3>Ruta de aprendizaje</h3>
+      <ol class="list-route">
+        <li><span class="route-num">1</span><span>Revisa el <strong>cuestionario</strong> y la codificación de cada variable.</span></li>
+        <li><span class="route-num">2</span><span>Explora la <strong>base de datos</strong>: ordena, filtra y descarga la muestra.</span></li>
+        <li><span class="route-num">3</span><span>Construye <strong>distribuciones de frecuencia</strong> y medidas descriptivas.</span></li>
+        <li><span class="route-num">4</span><span>Contrasta asociaciones con <strong>chi-cuadrado</strong> y cuantifica relaciones con <strong>Pearson</strong> y <strong>regresión</strong>.</span></li>
+        <li><span class="route-num">5</span><span>Lee los <strong>gráficos</strong> y cierra con la sección de <strong>interpretaciones</strong>.</span></li>
+      </ol>
+    </article>
+    <article class="card">
+      <h3>Advertencia metodológica</h3>
+      <div class="callout warning">
+        <h4>Datos sintéticos</h4>
+        <p>Los registros provienen de una base fija y coherente con el tema, pero no representan a estudiantes reales. Los resultados sirven para practicar procedimientos estadísticos, no para tomar decisiones institucionales.</p>
+      </div>
+      <p class="note">La mayoría de variables son de autorreporte. Una correlación o asociación estadística no demuestra causalidad. Además, la muestra es transversal: describe un momento, no una evolución temporal.</p>
+    </article>
+  </div>
+
+  <article class="card">
+    <h3>Resumen dinámico de la muestra visible</h3>
+    <div id="homeSummary" class="summary-text" aria-live="polite"></div>
+  </article>
+</section>
+
+<!-- ============ CUESTIONARIO ============ -->
+<section id="cuestionario" class="section" aria-labelledby="cuestionarioTitle">
+  <div class="section-head">
+    <span class="eyebrow">Instrumento de recolección</span>
+    <h2 id="cuestionarioTitle">Cuestionario y codificación de variables</h2>
+    <p>Instrumento de 15 preguntas adaptado a la administración del presupuesto personal. Las respuestas se codifican para construir una base de datos tabular; los montos se expresan en córdobas (C$) y corresponden a un mes típico. Se incluye la equivalencia referencial en dólares (US$ 1 = C$ 36.62).</p>
+  </div>
+  <div class="callout sage">
+    <h4>Indicaciones generales</h4>
+    <p>Responde pensando en tu mes más reciente. Si no recuerdas un monto exacto, proporciona una estimación. Si no ahorras o no tienes deuda, registra 0. La información sería anónima y solo se usaría con fines académicos.</p>
+  </div>
+  <div id="questionnaireGrid" class="question-grid"></div>
+  <article class="card">
+    <h3>Diccionario de variables</h3>
+    <div class="table-wrap">
+      <table id="codebookTable">
+        <caption>Matriz de variables, tipos y reglas de codificación.</caption>
+        <thead><tr><th>N.º</th><th>Variable</th><th>Pregunta</th><th>Tipo</th><th>Codificación</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note">El balance mensual (ingreso menos gasto total) es una variable derivada; no se pregunta directamente, pero se calcula para cada registro y se usa en el análisis descriptivo.</p>
+  </article>
+</section>
+
+<!-- ============ BASE DE DATOS ============ -->
+<section id="base" class="section" aria-labelledby="baseTitle">
+  <div class="section-head">
+    <span class="eyebrow">Datos sintéticos</span>
+    <h2 id="baseTitle">Base de datos interactiva</h2>
+    <p>Explora los 64 registros de la base. Puedes buscar, filtrar por variables categóricas, ordenar haciendo clic en los encabezados y descargar los datos visibles en CSV. La base es fija: no cambia entre sesiones.</p>
+  </div>
+
+  <div class="stats-grid" aria-label="Resumen de la base visible">
+    <div class="stat plain"><span class="label">Registros visibles</span><span class="value" id="dbN">—</span><span class="hint" id="dbNHint">de 64</span></div>
+    <div class="stat sage"><span class="label">Ingreso medio</span><span class="value" id="dbIngreso">—</span><span class="hint" id="dbIngresoHint">C$ por mes · US$</span></div>
+    <div class="stat highlight"><span class="label">Gasto medio</span><span class="value" id="dbGasto">—</span><span class="hint" id="dbGastoHint">C$ por mes · US$</span></div>
+    <div class="stat plain"><span class="label">Ahorro medio</span><span class="value" id="dbAhorro">—</span><span class="hint" id="dbAhorroHint">C$ por mes · US$</span></div>
+  </div>
+
+  <article class="card">
+    <div class="toolbar">
+      <div class="field grow">
+        <label for="searchInput">Buscar en la tabla</label>
+        <input type="search" id="searchInput" placeholder="Ej.: Tecnología, Siempre, App, 12 000…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="filterArea">Facultad</label>
+        <select id="filterArea"><option value="">Todas</option></select>
+      </div>
+      <div class="field">
+        <label for="filterBudget">Uso de presupuesto</label>
+        <select id="filterBudget"><option value="">Todos</option></select>
+      </div>
+      <div class="field">
+        <label for="filterSource">Fuente de ingresos</label>
+        <select id="filterSource"><option value="">Todas</option></select>
+      </div>
+      <div class="toolbar-actions">
+        <button type="button" class="btn ghost" id="btnResetFilters">Limpiar filtros</button>
+        <button type="button" class="btn secondary" id="btnCsv">Descargar CSV</button>
+        <button type="button" class="btn ghost" id="btnPrintDb">Imprimir</button>
+      </div>
+    </div>
+    <div class="filter-summary" id="filterSummary" aria-live="polite"></div>
+    <div class="table-wrap tall" id="dbTableWrap">
+      <table id="dataTable">
+        <caption class="sr-only">Base de datos sintética de presupuesto personal universitario. Los encabezados permiten ordenar.</caption>
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state hidden">
+      <strong>No hay registros con esos filtros</strong>
+      Limpia los filtros o cambia los criterios de búsqueda para volver a ver datos.
+    </div>
+    <p class="note">Los montos están en córdobas (C$) y corresponden a un mes. Debajo de cada cantidad se muestra su equivalente en dólares (US$), calculado con el tipo de cambio referencial de C$ 36.62 por US$ 1. La base es sintética y fija: sus 64 registros están definidos de antemano y conservan coherencia entre ingreso, gasto, ahorro, deuda y hábitos de control. Desplaza la tabla horizontalmente para ver todas las columnas.</p>
+  </article>
+</section>
+
+<!-- ============ FRECUENCIAS ============ -->
+<section id="frecuencias" class="section" aria-labelledby="frecTitle">
+  <div class="section-head">
+    <span class="eyebrow">Distribuciones de frecuencia</span>
+    <h2 id="frecTitle">Frecuencias absolutas, relativas y acumuladas</h2>
+    <p>Las tablas se recalculan con los registros visibles. Para variables cualitativas se muestra la frecuencia de cada categoría; para variables cuantitativas se construyen intervalos de clase, marcas de clase y frecuencias acumuladas.</p>
+  </div>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Variable cualitativa</h3>
+        <p>Frecuencias absolutas, relativas y porcentuales. En variables ordinales se agrega la frecuencia acumulada.</p>
+      </div>
+      <div class="field-inline">
+        <label for="qualVarSelect">Variable</label>
+        <select id="qualVarSelect"></select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="qualFreqTable">
+        <caption id="qualFreqCaption">Distribución de frecuencias.</caption>
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="interpretacion" id="qualInterp">
+      <h4>¿Cómo se interpreta?</h4>
+      <p>La distribución de frecuencias resume cuántos registros hay en cada categoría y qué proporción representan.</p>
+    </div>
+    <p class="note">La frecuencia relativa (h) es la frecuencia absoluta dividida entre el total de registros visibles. El porcentaje es h × 100. Los acumulados solo se muestran cuando el orden de las categorías tiene sentido (variables ordinales).</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Variable cuantitativa agrupada</h3>
+        <p>Intervalos de clase, marcas de clase y frecuencias acumuladas. El número de clases se aproxima con la regla de Sturges.</p>
+      </div>
+      <div class="field-inline">
+        <label for="quantVarSelect">Variable</label>
+        <select id="quantVarSelect"></select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="quantFreqTable">
+        <caption id="quantFreqCaption">Distribución agrupada en intervalos.</caption>
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="interpretacion" id="quantInterp">
+      <h4>¿Cómo se interpreta?</h4>
+      <p>Los intervalos agrupan los valores para resumir la forma de la distribución y facilitar la lectura de los datos.</p>
+    </div>
+    <p class="note">La marca de clase es el punto medio de cada intervalo y se usa como representante del grupo. La media y la mediana exactas se calculan con los valores individuales en la sección Descriptiva; la tabla agrupada es una síntesis visual.</p>
+  </article>
+</section>
+
+<!-- ============ DESCRIPTIVA ============ -->
+<section id="descriptiva" class="section" aria-labelledby="descTitle">
+  <div class="section-head">
+    <span class="eyebrow">Estadística descriptiva</span>
+    <h2 id="descTitle">Media, mediana, dispersión y percentiles</h2>
+    <p>Selecciona una variable cuantitativa para obtener sus medidas de tendencia central, dispersión, posición y un resumen comparativo de todas las variables numéricas de la base visible.</p>
+  </div>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Medidas de resumen</h3>
+        <p>Varianza y desviación estándar muestrales; cuartiles y percentiles por interpolación lineal.</p>
+      </div>
+      <div class="field-inline">
+        <label for="descVarSelect">Variable</label>
+        <select id="descVarSelect"></select>
+      </div>
+    </div>
+    <div id="descStats" class="stats-grid" aria-live="polite"></div>
+    <div class="table-wrap short" style="margin-top:1rem">
+      <table id="percentileTable">
+        <caption>Percentiles seleccionados de la variable.</caption>
+        <thead><tr><th>Percentil</th><th class="num">Valor (C$ · US$)</th><th>Lectura</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="interpretacion" id="descInterp">
+      <h4>¿Cómo se interpreta?</h4>
+      <p>La media resume el valor promedio; la mediana divide la muestra en dos mitades; la desviación estándar indica cuánto se dispersan los datos alrededor de la media.</p>
+    </div>
+    <p class="note">La moda se calcula sobre los valores registrados. En variables continuas o con muchos valores distintos puede no existir una moda única. El coeficiente de variación (CV) permite comparar la dispersión relativa: menos de 15 % se considera baja, entre 15 % y 30 % moderada, y más de 30 % alta.</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Resumen de variables cuantitativas</h3>
+        <p>Comparación rápida de todas las variables numéricas con los registros visibles.</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="summaryTable">
+        <caption>Estadísticos descriptivos de las variables cuantitativas.</caption>
+        <thead><tr><th>Variable</th><th class="num">n</th><th class="num">Media</th><th class="num">Mediana</th><th class="num">Desv. est.</th><th class="num">Mín.</th><th class="num">Máx.</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note">La desviación estándar es muestral (denominador n − 1). Las columnas con “—” indican que no hay suficientes datos para calcular la medida.</p>
+  </article>
+</section>
+
+<!-- ============ PRUEBAS ============ -->
+<section id="pruebas" class="section" aria-labelledby="pruebasTitle">
+  <div class="section-head">
+    <span class="eyebrow">Inferencia y asociación</span>
+    <h2 id="pruebasTitle">Pruebas estadísticas</h2>
+    <p>Se contrasta la independencia entre dos variables cualitativas con chi-cuadrado y se cuantifica la relación lineal entre dos variables cuantitativas con el coeficiente de Pearson. Todos los resultados usan los registros visibles y un nivel de significación α = 0,05.</p>
+  </div>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Tabla de contingencia y prueba chi-cuadrado</h3>
+        <p>Contrasta si dos variables cualitativas son independientes en la muestra.</p>
+      </div>
+      <div class="field-inline">
+        <label for="chiA">Variable A</label>
+        <select id="chiA"></select>
+        <span aria-hidden="true">×</span>
+        <label for="chiB" class="sr-only">Variable B</label>
+        <select id="chiB"></select>
+      </div>
+    </div>
+    <div class="hypothesis" id="chiHypotheses"></div>
+    <div class="grid-2">
+      <div>
+        <h4 style="margin-bottom:.4rem">Frecuencias observadas</h4>
+        <div class="table-wrap short"><table id="chiObsTable"><caption>Conteo de estudiantes en cada combinación de categorías.</caption><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+      </div>
+      <div>
+        <h4 style="margin-bottom:.4rem">Frecuencias esperadas</h4>
+        <div class="table-wrap short"><table id="chiExpTable"><caption>Valores esperados bajo la hipótesis de independencia.</caption><thead></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div id="chiResults" class="stats-grid" style="margin-top:1rem" aria-live="polite"></div>
+    <div id="chiAssumptions" class="callout warning"></div>
+    <div class="interpretacion" id="chiInterp">
+      <h4>¿Cómo se interpreta?</h4>
+      <p>El valor p indica la probabilidad de observar una tabla como esta, o más extrema, si las variables fueran independientes.</p>
+    </div>
+    <p class="note">H0: las variables son independientes. H1: existe asociación. Se rechaza H0 cuando p &lt; 0,05. La prueba chi-cuadrado requiere frecuencias esperadas suficientemente grandes; si muchas celdas tienen valores esperados menores que 5, la aproximación puede ser poco fiable. El estadístico V de Cramér resume la intensidad de la asociación (0 = independencia; 1 = asociación perfecta).</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Correlación lineal de Pearson</h3>
+        <p>Mide dirección e intensidad de la relación lineal entre dos variables cuantitativas.</p>
+      </div>
+      <div class="field-inline">
+        <label for="corrX">Variable X</label>
+        <select id="corrX"></select>
+        <span aria-hidden="true">×</span>
+        <label for="corrY" class="sr-only">Variable Y</label>
+        <select id="corrY"></select>
+      </div>
+    </div>
+    <div class="hypothesis" id="corrHypotheses"></div>
+    <div id="corrResults" class="stats-grid" aria-live="polite"></div>
+    <div class="chart-box">
+      <div class="chart-legend"><span><i class="legend-dot" style="background:var(--chart-blue)"></i>Estudiantes</span><span><i class="legend-dot" style="background:var(--chart-green)"></i>Recta de mínimos cuadrados</span></div>
+      <canvas id="chartCorr" width="900" height="360" role="img" aria-label="Diagrama de dispersión de las dos variables cuantitativas seleccionadas"></canvas>
+    </div>
+    <div class="interpretacion" id="corrInterp">
+      <h4>¿Cómo se interpreta?</h4>
+      <p>El coeficiente r varía entre −1 y 1. El signo indica la dirección y su valor absoluto, la intensidad de la relación lineal.</p>
+    </div>
+    <div class="callout warning">
+      <h4>Correlación no implica causalidad</h4>
+      <p>Una asociación lineal puede deberse a una tercera variable, a la forma en que se midieron los datos o al azar. Este diseño transversal no permite establecer relaciones de causa y efecto.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ REGRESIÓN ============ -->
+<section id="regresion" class="section" aria-labelledby="regTitle">
+  <div class="section-head">
+    <span class="eyebrow">Modelo lineal simple</span>
+    <h2 id="regTitle">Regresión lineal simple</h2>
+    <p>Se estima una recta que resume cómo cambia una variable cuantitativa (Y) en función de otra (X). El modelo se ajusta por mínimos cuadrados ordinarios con los registros visibles.</p>
+  </div>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3>Ecuación estimada</h3>
+        <p>Elige la variable predictora (X) y la variable de respuesta (Y).</p>
+      </div>
+      <div class="field-inline">
+        <label for="regX">X (predictora)</label>
+        <select id="regX"></select>
+        <span aria-hidden="true">→</span>
+        <label for="regY" class="sr-only">Y (respuesta)</label>
+        <select id="regY"></select>
+      </div>
+    </div>
+    <div class="equation" id="regEquation">Selecciona dos variables distintas para estimar el modelo.</div>
+    <div id="regResults" class="stats-grid" aria-live="polite"></div>
+    <div class="chart-box">
+      <div class="chart-legend"><span><i class="legend-dot" style="background:var(--chart-blue)"></i>Valores observados</span><span><i class="legend-dot" style="background:var(--chart-green)"></i>Recta estimada</span></div>
+      <canvas id="chartReg" width="900" height="360" role="img" aria-label="Diagrama de dispersión con recta de regresión de las variables seleccionadas"></canvas>
+    </div>
+
+    <div class="card" style="box-shadow:none;margin:1.1rem 0 0;background:var(--soft)">
+      <h3 style="font-size:.98rem">Predicción dentro del rango observado</h3>
+      <form id="predictionForm" class="toolbar" novalidate>
+        <div class="field grow">
+          <label for="predX" id="predLabel">Valor de X</label>
+          <input type="number" id="predX" step="any" placeholder="Ingresa un valor">
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn primary">Calcular predicción</button>
+        </div>
+      </form>
+      <div id="predResult" class="prediction-result hidden" aria-live="polite"></div>
+      <p class="note" id="predRangeNote">La predicción es prudente solo dentro del rango de X observado en la muestra.</p>
+    </div>
+
+    <h3 style="margin-top:1.2rem">Valores observados y estimados</h3>
+    <div class="table-wrap short">
+      <table id="regTable">
+        <caption>Comparación entre Y observado y Y estimado por el modelo.</caption>
+        <thead><tr><th>ID</th><th class="num">X</th><th class="num">Y observado</th><th class="num">Y estimado</th><th class="num">Residual</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="interpretacion" id="regInterp">
+      <h4>¿Cómo se interpreta?</h4>
+      <p>La pendiente indica cuánto cambia Y, en promedio, por cada unidad adicional de X. El intercepto es el valor estimado de Y cuando X = 0. El R² indica la proporción de variabilidad de Y explicada por X.</p>
+    </div>
+    <p class="note">El modelo supone una relación lineal, errores con media cero y varianza constante, observaciones independientes y ausencia de valores atípicos influyentes. Si el diagrama de dispersión no muestra un patrón aproximadamente lineal, la recta puede ser una síntesis pobre de los datos.</p>
+  </article>
+</section>
+
+<!-- ============ GRÁFICOS ============ -->
+<section id="graficos" class="section" aria-labelledby="graficosTitle">
+  <div class="section-head">
+    <span class="eyebrow">Visualización de datos</span>
+    <h2 id="graficosTitle">Gráficos vinculados a la base</h2>
+    <p>Todos los gráficos se dibujan con Canvas nativo y se recalculan cuando cambias los filtros o las variables. Cada visualización incluye título, etiquetas, unidades e interpretación. Los montos se expresan en córdobas (C$); la equivalencia referencial es US$ 1 = C$ 36.62.</p>
+  </div>
+
+  <div class="charts-grid">
+    <article class="card">
+      <div class="card-head">
+        <div><h3>Gráfico de barras</h3><p class="chart-sub">Frecuencia absoluta por categoría (n.º de estudiantes).</p></div>
+        <div class="field-inline"><label for="chartBarVar">Variable</label><select id="chartBarVar"></select></div>
+      </div>
+      <canvas id="chartBars" width="900" height="360" role="img" aria-label="Gráfico de barras de la variable cualitativa seleccionada"></canvas>
+      <div class="interpretacion" id="barInterp"></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div><h3>Histograma y polígono de frecuencias</h3><p class="chart-sub">Frecuencia absoluta por intervalo de clase; la línea une las marcas de clase.</p></div>
+        <div class="field-inline"><label for="chartHistVar">Variable</label><select id="chartHistVar"></select></div>
+      </div>
+      <div class="chart-legend"><span><i class="legend-dot" style="background:var(--chart-blue)"></i>Frecuencia absoluta</span><span><i class="legend-dot" style="background:var(--chart-green)"></i>Polígono de frecuencias</span></div>
+      <canvas id="chartHist" width="900" height="360" role="img" aria-label="Histograma y polígono de frecuencias de la variable cuantitativa seleccionada"></canvas>
+      <div class="interpretacion" id="histInterp"></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div><h3>Gráfico circular</h3><p class="chart-sub">Participación porcentual de cada categoría sobre el total visible.</p></div>
+        <div class="field-inline"><label for="chartPieVar">Variable</label><select id="chartPieVar"></select></div>
+      </div>
+      <canvas id="chartPie" width="900" height="360" role="img" aria-label="Gráfico circular de la variable cualitativa seleccionada"></canvas>
+      <div class="interpretacion" id="pieInterp"></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div><h3>Diagrama de dispersión y recta</h3><p class="chart-sub">Cada punto es un estudiante; la recta resume la tendencia lineal.</p></div>
+        <div class="field-inline">
+          <label for="chartScatterX">X</label><select id="chartScatterX"></select>
+          <span aria-hidden="true">×</span><label for="chartScatterY" class="sr-only">Y</label><select id="chartScatterY"></select>
+        </div>
+      </div>
+      <div class="chart-legend"><span><i class="legend-dot" style="background:var(--chart-blue)"></i>Observaciones</span><span><i class="legend-dot" style="background:var(--chart-green)"></i>Recta de regresión</span></div>
+      <canvas id="chartScatter" width="900" height="360" role="img" aria-label="Diagrama de dispersión con recta de regresión"></canvas>
+      <div class="interpretacion" id="scatterInterp"></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div><h3>Ahorro promedio según hábitos</h3><p class="chart-sub">Ahorro medio mensual (C$) por categoría de la variable seleccionada.</p></div>
+        <div class="field-inline"><label for="chartGroupVar">Agrupar por</label><select id="chartGroupVar"></select></div>
+      </div>
+      <canvas id="chartSavings" width="900" height="360" role="img" aria-label="Barras de ahorro promedio según la variable de agrupación seleccionada"></canvas>
+      <div class="interpretacion" id="savingsInterp"></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div><h3>Ingreso y gasto promedio por facultad</h3><p class="chart-sub">Comparación de dos series en córdobas (C$) para cada facultad.</p></div>
+      </div>
+      <div class="chart-legend"><span><i class="legend-dot" style="background:var(--chart-blue)"></i>Ingreso promedio</span><span><i class="legend-dot" style="background:var(--chart-green)"></i>Gasto promedio</span></div>
+      <canvas id="chartIncomeExpense" width="900" height="360" role="img" aria-label="Comparación de ingreso y gasto promedio por facultad"></canvas>
+      <div class="interpretacion" id="incExpInterp"></div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ INTERPRETACIONES ============ -->
+<section id="interpretaciones" class="section" aria-labelledby="interpTitle">
+  <div class="section-head">
+    <span class="eyebrow">Guía de lectura</span>
+    <h2 id="interpTitle">Interpretaciones, alcances y limitaciones</h2>
+    <p>Esta sección reúne criterios para leer los resultados sin sobreinterpretarlos. Cada procedimiento de la aplicación incluye su propio bloque «¿Cómo se interpreta?».</p>
+  </div>
+
+  <div class="grid-2">
+    <article class="card">
+      <h3>Distribuciones de frecuencia</h3>
+      <p>La frecuencia absoluta cuenta casos; la relativa los expresa como proporción del total; el porcentaje multiplica la relativa por 100. Los acumulados responden a “cuántos o qué proporción queda hasta esta categoría”. En variables nominales no tiene sentido acumular porque las categorías no tienen orden.</p>
+    </article>
+    <article class="card">
+      <h3>Medidas descriptivas</h3>
+      <p>La media es sensible a valores extremos; la mediana es más robusta. La desviación estándar resume la dispersión en las mismas unidades de la variable. Los cuartiles dividen la muestra en cuatro partes y el rango intercuartílico (Q3 − Q1) concentra el 50 % central.</p>
+    </article>
+    <article class="card">
+      <h3>Chi-cuadrado</h3>
+      <p>El valor p no mide la fuerza de la asociación: solo indica cuánta evidencia hay contra la independencia. Una asociación puede ser estadísticamente significativa pero pequeña. V de Cramér ayuda a valorar su intensidad. Si las frecuencias esperadas son bajas, el valor p puede ser impreciso.</p>
+    </article>
+    <article class="card">
+      <h3>Correlación y regresión</h3>
+      <p>Pearson mide asociación lineal, no cualquier tipo de relación. Un r cercano a cero no descarta una relación curva. En regresión, la pendiente depende de las unidades: no es correcto comparar pendientes entre variables con escalas distintas sin estandarizar. El R² no prueba causalidad ni garantiza que el modelo sea adecuado.</p>
+    </article>
+  </div>
+
+  <article class="card">
+    <h3>Limitaciones del estudio</h3>
+    <div class="grid-2">
+      <ul class="list-check">
+        <li>Los datos son <strong>sintéticos</strong>: no representan personas reales.</li>
+        <li>El diseño es <strong>transversal</strong>: no permite analizar cambios en el tiempo.</li>
+        <li>Los montos son <strong>autorreportados</strong> y podrían estar sujetos a error de recordación.</li>
+        <li>La muestra es pequeña y no probabilística; no se generaliza a una población.</li>
+      </ul>
+      <ul class="list-check">
+        <li>La moneda y el contexto son referenciales (córdobas nicaragüenses y dólares, con un tipo de cambio fijo de C$ 36.62 por US$ 1).</li>
+        <li>Hay variables relevantes no medidas, como el apoyo familiar, la vivienda o la coyuntura económica.</li>
+        <li>Una asociación estadística <strong>no demuestra causalidad</strong>.</li>
+        <li>Los valores atípicos y los supuestos del modelo deben revisarse antes de sacar conclusiones.</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="card">
+    <h3>Síntesis dinámica de resultados</h3>
+    <div id="finalSummary" class="summary-text" aria-live="polite"></div>
+  </article>
+
+  <article class="card">
+    <h3>Glosario mínimo</h3>
+    <div class="grid-3">
+      <div><h4>Frecuencia relativa</h4><p class="note">Proporción de casos en una categoría: f / n.</p></div>
+      <div><h4>Valor p</h4><p class="note">Probabilidad de obtener un resultado al menos tan extremo como el observado si H0 es cierta.</p></div>
+      <div><h4>R²</h4><p class="note">Proporción de la variabilidad de Y que el modelo lineal explica con X.</p></div>
+      <div><h4>Residual</h4><p class="note">Diferencia entre el valor observado y el estimado: y − ŷ.</p></div>
+      <div><h4>V de Cramér</h4><p class="note">Medida de asociación entre dos variables categóricas, basada en chi-cuadrado.</p></div>
+      <div><h4>Percentil</h4><p class="note">Valor por debajo del cual queda un porcentaje dado de las observaciones.</p></div>
+    </div>
+  </article>
+
+  <div class="no-print" style="display:flex;gap:.5rem;flex-wrap:wrap">
+    <button type="button" class="btn primary" id="btnPrintAll">Imprimir sección actual</button>
+    <button type="button" class="btn ghost" data-goto="inicio">Volver al inicio</button>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  Laboratorio virtual de estadística aplicada · Administración del presupuesto personal de estudiantes universitarios · Datos sintéticos con fines educativos · Resultados calculados en el navegador.
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* =========================================================
+   1. CONFIGURACIÓN, VARIABLES Y GENERACIÓN DE DATOS
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+const CDF_PER_USD = 36.62;
+const SEXOS = ['Femenino', 'Masculino'];
+const SEMESTRES = ['1.º–2.º', '3.º–4.º', '5.º–6.º', '7.º–8.º', '9.º–10.º'];
+const FUENTES = ['Familia', 'Trabajo', 'Beca', 'Negocio propio', 'Mixto'];
+const USOS = ['Nunca', 'A veces', 'Siempre'];
+const HERRAMIENTAS = ['App móvil', 'Cuaderno', 'Excel', 'Control mental', 'No lleva control'];
+const ESTRES_LABELS = {1:'Nada', 2:'Poco', 3:'Moderado', 4:'Bastante', 5:'Mucho'};
+const AREAS = [
+  {area:'Tecnología', carreras:['Ing. de Sistemas','Ing. Industrial','Ing. en Computación']},
+  {area:'Medicina', carreras:['Medicina']},
+  {area:'Odontología', carreras:['Odontología']},
+  {area:'Humanidades', carreras:['Psicología','Comunicación','Literatura']},
+  {area:'Económica', carreras:['Administración','Contabilidad','Economía']},
+  {area:'Derecho', carreras:['Derecho']},
+  {area:'Agraria', carreras:['Agronomía','Ing. Agroindustrial','Veterinaria']},
+  {area:'Química', carreras:['Química','Farmacia','Ing. Química']}
+];
+const AREA_NAMES = AREAS.map(a => a.area);
+
+const VARS = {
+  edad:{label:'Edad', kind:'quant', unit:'años', decimals:0},
+  sexo:{label:'Sexo', kind:'qual', nominal:true, order:SEXOS},
+  area:{label:'Facultad', kind:'qual', nominal:true, order:AREA_NAMES},
+  semestre:{label:'Semestre', kind:'qual', ordinal:true, order:SEMESTRES},
+  fuente:{label:'Fuente principal de ingresos', kind:'qual', nominal:true, order:FUENTES},
+  ingreso:{label:'Ingreso mensual', kind:'quant', unit:'C$', money:true},
+  gastoTotal:{label:'Gasto mensual total', kind:'quant', unit:'C$', money:true},
+  alimentacion:{label:'Gasto en alimentación', kind:'quant', unit:'C$', money:true},
+  transporte:{label:'Gasto en transporte', kind:'quant', unit:'C$', money:true},
+  ocio:{label:'Gasto en ocio y salidas', kind:'quant', unit:'C$', money:true},
+  ahorro:{label:'Ahorro mensual', kind:'quant', unit:'C$', money:true},
+  deuda:{label:'Deuda acumulada', kind:'quant', unit:'C$', money:true},
+  usoPresupuesto:{label:'Uso de presupuesto', kind:'qual', ordinal:true, order:USOS},
+  herramienta:{label:'Herramienta de control', kind:'qual', nominal:true, order:HERRAMIENTAS},
+  estres:{label:'Estrés financiero', kind:'qual', ordinal:true, order:[1,2,3,4,5], labelFn:(v)=>ESTRES_LABELS[v] || String(v)},
+  balance:{label:'Balance mensual (ingreso − gasto)', kind:'quant', unit:'C$', money:true, derived:true}
+};
+const QUAL_KEYS = Object.keys(VARS).filter(k => VARS[k].kind === 'qual');
+const QUANT_KEYS = Object.keys(VARS).filter(k => VARS[k].kind === 'quant');
+
+const QUESTIONS = [
+  {n:1,var:'edad',q:'¿Cuántos años cumplidos tienes?',type:'Cuantitativa discreta',coding:'Años cumplidos (17 a 28)',options:['17–28 años']},
+  {n:2,var:'sexo',q:'¿Con qué sexo te identificas?',type:'Cualitativa nominal',coding:'1 = Femenino · 2 = Masculino',options:SEXOS},
+  {n:3,var:'area',q:'¿A qué facultad pertenece tu carrera?',type:'Cualitativa nominal',coding:'1 = Tecnología · 2 = Medicina · 3 = Odontología · 4 = Humanidades · 5 = Económica · 6 = Derecho · 7 = Agraria · 8 = Química',options:AREA_NAMES},
+  {n:4,var:'semestre',q:'¿En qué semestre de tu carrera estás?',type:'Cualitativa ordinal',coding:'1 = 1.º–2.º · 2 = 3.º–4.º · 3 = 5.º–6.º · 4 = 7.º–8.º · 5 = 9.º–10.º',options:SEMESTRES},
+  {n:5,var:'fuente',q:'¿Cuál es tu principal fuente de ingresos?',type:'Cualitativa nominal',coding:'1 = Familia · 2 = Trabajo · 3 = Beca · 4 = Negocio propio · 5 = Mixto',options:FUENTES},
+  {n:6,var:'ingreso',q:'¿Cuánto dinero recibes o ganas en un mes típico (C$)?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$), sin decimales; se muestra su equivalente en US$',options:['Respuesta numérica en C$']},
+  {n:7,var:'gastoTotal',q:'¿Cuánto gastas en total en un mes típico (C$)?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$), sin decimales; se muestra su equivalente en US$',options:['Respuesta numérica en C$']},
+  {n:8,var:'alimentacion',q:'¿Cuánto de ese gasto corresponde a alimentación (C$)?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$), sin decimales',options:['Respuesta numérica en C$']},
+  {n:9,var:'transporte',q:'¿Cuánto gastas al mes en transporte (C$)?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$), sin decimales',options:['Respuesta numérica en C$']},
+  {n:10,var:'ocio',q:'¿Cuánto gastas al mes en ocio, salidas o entretenimiento (C$)?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$), sin decimales',options:['Respuesta numérica en C$']},
+  {n:11,var:'ahorro',q:'¿Cuánto ahorras en un mes típico (C$)?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$); 0 si no ahorra. Equivalencia en US$ al tipo de cambio 36.62',options:['Respuesta numérica en C$']},
+  {n:12,var:'usoPresupuesto',q:'¿Con qué frecuencia sigues un presupuesto para controlar tus gastos?',type:'Cualitativa ordinal',coding:'1 = Nunca · 2 = A veces · 3 = Siempre',options:USOS},
+  {n:13,var:'herramienta',q:'¿Qué herramienta usas principalmente para controlar tus gastos?',type:'Cualitativa nominal',coding:'1 = App móvil · 2 = Cuaderno · 3 = Excel · 4 = Control mental · 5 = No lleva control',options:HERRAMIENTAS},
+  {n:14,var:'deuda',q:'¿Cuánto debes actualmente (préstamos, tarjetas, cuotas) en C$?',type:'Cuantitativa continua',coding:'Monto en córdobas (C$); 0 si no tiene deuda. Equivalencia en US$ al tipo de cambio 36.62',options:['Respuesta numérica en C$']},
+  {n:15,var:'estres',q:'En una escala del 1 al 5, ¿cuánto estrés financiero sientes?',type:'Cualitativa ordinal (Likert)',coding:'1 = Nada · 2 = Poco · 3 = Moderado · 4 = Bastante · 5 = Mucho',options:['1 Nada','2 Poco','3 Moderado','4 Bastante','5 Mucho']}
+];
+
+const state = {
+  data: [],
+  filtered: [],
+  sortKey: 'id',
+  sortDir: 'asc',
+  filters: {search:'', area:'', budget:'', source:''},
+  qualVar: 'usoPresupuesto',
+  quantVar: 'gastoTotal',
+  descVar: 'gastoTotal',
+  chiA: 'area',
+  chiB: 'usoPresupuesto',
+  corrX: 'ingreso',
+  corrY: 'ahorro',
+  regX: 'ingreso',
+  regY: 'ahorro',
+  chartBarVar: 'usoPresupuesto',
+  chartHistVar: 'gastoTotal',
+  chartPieVar: 'fuente',
+  chartScatterX: 'ingreso',
+  chartScatterY: 'gastoTotal',
+  chartGroupVar: 'usoPresupuesto'
+};
+
+/* Utilidades numéricas y base de datos fija */
+function clamp(v, lo, hi){ return Math.min(hi, Math.max(lo, v)); }
+function pct(part, total){ return total ? (part / total) * 100 : 0; }
+function normText(s){ return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const DATASET = [
+  { "id":1,"edad":24,"sexo":"Masculino","area":"Química","semestre":"7.º–8.º","fuente":"Familia","ingreso":11600,"gastoTotal":10600,"alimentacion":5200,"transporte":300,"ocio":1900,"ahorro":600,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":3,"balance":1000 },
+  { "id":2,"edad":23,"sexo":"Femenino","area":"Económica","semestre":"5.º–6.º","fuente":"Familia","ingreso":9900,"gastoTotal":8000,"alimentacion":2900,"transporte":600,"ocio":2100,"ahorro":1700,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":1,"balance":1900 },
+  { "id":3,"edad":19,"sexo":"Femenino","area":"Odontología","semestre":"3.º–4.º","fuente":"Beca","ingreso":8900,"gastoTotal":8000,"alimentacion":2500,"transporte":700,"ocio":900,"ahorro":900,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":3,"balance":900 },
+  { "id":4,"edad":17,"sexo":"Femenino","area":"Humanidades","semestre":"1.º–2.º","fuente":"Beca","ingreso":9500,"gastoTotal":6700,"alimentacion":2400,"transporte":300,"ocio":800,"ahorro":2400,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":2,"balance":2800 },
+  { "id":5,"edad":23,"sexo":"Masculino","area":"Económica","semestre":"5.º–6.º","fuente":"Familia","ingreso":10800,"gastoTotal":8900,"alimentacion":2700,"transporte":1400,"ocio":2100,"ahorro":1500,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":1900 },
+  { "id":6,"edad":22,"sexo":"Masculino","area":"Agraria","semestre":"5.º–6.º","fuente":"Familia","ingreso":14500,"gastoTotal":9200,"alimentacion":4500,"transporte":1000,"ocio":1800,"ahorro":2900,"deuda":3300,"usoPresupuesto":"Nunca","herramienta":"Cuaderno","estres":4,"balance":5300 },
+  { "id":7,"edad":24,"sexo":"Femenino","area":"Humanidades","semestre":"7.º–8.º","fuente":"Trabajo","ingreso":11900,"gastoTotal":6000,"alimentacion":3500,"transporte":1600,"ocio":200,"ahorro":3900,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":5900 },
+  { "id":8,"edad":23,"sexo":"Femenino","area":"Tecnología","semestre":"7.º–8.º","fuente":"Familia","ingreso":16600,"gastoTotal":7200,"alimentacion":3500,"transporte":300,"ocio":1600,"ahorro":6000,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Cuaderno","estres":3,"balance":9400 },
+  { "id":9,"edad":21,"sexo":"Masculino","area":"Económica","semestre":"5.º–6.º","fuente":"Mixto","ingreso":31400,"gastoTotal":12700,"alimentacion":6200,"transporte":800,"ocio":700,"ahorro":16100,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Cuaderno","estres":2,"balance":18700 },
+  { "id":10,"edad":19,"sexo":"Femenino","area":"Derecho","semestre":"3.º–4.º","fuente":"Familia","ingreso":14500,"gastoTotal":8100,"alimentacion":3400,"transporte":800,"ocio":1300,"ahorro":3400,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Excel","estres":3,"balance":6400 },
+  { "id":11,"edad":26,"sexo":"Femenino","area":"Medicina","semestre":"9.º–10.º","fuente":"Trabajo","ingreso":15500,"gastoTotal":11600,"alimentacion":4700,"transporte":1600,"ocio":2400,"ahorro":2200,"deuda":2200,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":3900 },
+  { "id":12,"edad":26,"sexo":"Masculino","area":"Química","semestre":"9.º–10.º","fuente":"Negocio propio","ingreso":14200,"gastoTotal":9000,"alimentacion":4600,"transporte":600,"ocio":1900,"ahorro":4700,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":5200 },
+  { "id":13,"edad":21,"sexo":"Femenino","area":"Medicina","semestre":"5.º–6.º","fuente":"Mixto","ingreso":19900,"gastoTotal":10700,"alimentacion":5200,"transporte":600,"ocio":2900,"ahorro":5000,"deuda":1800,"usoPresupuesto":"Nunca","herramienta":"Cuaderno","estres":1,"balance":9200 },
+  { "id":14,"edad":22,"sexo":"Femenino","area":"Odontología","semestre":"5.º–6.º","fuente":"Trabajo","ingreso":16200,"gastoTotal":13300,"alimentacion":5900,"transporte":1700,"ocio":2500,"ahorro":2400,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":4,"balance":2900 },
+  { "id":15,"edad":21,"sexo":"Femenino","area":"Humanidades","semestre":"3.º–4.º","fuente":"Trabajo","ingreso":9400,"gastoTotal":8500,"alimentacion":4100,"transporte":1500,"ocio":700,"ahorro":700,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":900 },
+  { "id":16,"edad":23,"sexo":"Masculino","area":"Agraria","semestre":"5.º–6.º","fuente":"Familia","ingreso":10600,"gastoTotal":6900,"alimentacion":2900,"transporte":1200,"ocio":1100,"ahorro":2700,"deuda":0,"usoPresupuesto":"A veces","herramienta":"No lleva control","estres":2,"balance":3700 },
+  { "id":17,"edad":26,"sexo":"Masculino","area":"Económica","semestre":"9.º–10.º","fuente":"Familia","ingreso":11900,"gastoTotal":6300,"alimentacion":2800,"transporte":600,"ocio":700,"ahorro":4200,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Excel","estres":3,"balance":5600 },
+  { "id":18,"edad":25,"sexo":"Femenino","area":"Odontología","semestre":"7.º–8.º","fuente":"Familia","ingreso":9600,"gastoTotal":8900,"alimentacion":4100,"transporte":900,"ocio":800,"ahorro":500,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":700 },
+  { "id":19,"edad":25,"sexo":"Masculino","area":"Química","semestre":"7.º–8.º","fuente":"Familia","ingreso":10200,"gastoTotal":7500,"alimentacion":4600,"transporte":300,"ocio":800,"ahorro":1700,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Control mental","estres":3,"balance":2700 },
+  { "id":20,"edad":22,"sexo":"Femenino","area":"Humanidades","semestre":"5.º–6.º","fuente":"Trabajo","ingreso":22400,"gastoTotal":7000,"alimentacion":3800,"transporte":1000,"ocio":1600,"ahorro":13700,"deuda":2200,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":15400 },
+  { "id":21,"edad":19,"sexo":"Masculino","area":"Económica","semestre":"1.º–2.º","fuente":"Familia","ingreso":11800,"gastoTotal":5000,"alimentacion":3800,"transporte":300,"ocio":200,"ahorro":3000,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":5,"balance":6800 },
+  { "id":22,"edad":19,"sexo":"Femenino","area":"Tecnología","semestre":"3.º–4.º","fuente":"Familia","ingreso":9400,"gastoTotal":9700,"alimentacion":3500,"transporte":1800,"ocio":500,"ahorro":0,"deuda":1200,"usoPresupuesto":"Siempre","herramienta":"Excel","estres":4,"balance":-300 },
+  { "id":23,"edad":18,"sexo":"Femenino","area":"Química","semestre":"1.º–2.º","fuente":"Familia","ingreso":9500,"gastoTotal":8400,"alimentacion":4400,"transporte":1000,"ocio":500,"ahorro":1000,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":1100 },
+  { "id":24,"edad":25,"sexo":"Femenino","area":"Humanidades","semestre":"9.º–10.º","fuente":"Trabajo","ingreso":8900,"gastoTotal":8500,"alimentacion":3500,"transporte":1900,"ocio":300,"ahorro":0,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":400 },
+  { "id":25,"edad":23,"sexo":"Masculino","area":"Humanidades","semestre":"7.º–8.º","fuente":"Mixto","ingreso":14200,"gastoTotal":9400,"alimentacion":2000,"transporte":1000,"ocio":1600,"ahorro":4200,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Control mental","estres":2,"balance":4800 },
+  { "id":26,"edad":17,"sexo":"Femenino","area":"Química","semestre":"1.º–2.º","fuente":"Trabajo","ingreso":18100,"gastoTotal":12400,"alimentacion":3900,"transporte":1400,"ocio":2000,"ahorro":4300,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":5700 },
+  { "id":27,"edad":17,"sexo":"Femenino","area":"Agraria","semestre":"1.º–2.º","fuente":"Trabajo","ingreso":19800,"gastoTotal":12700,"alimentacion":5800,"transporte":2000,"ocio":1400,"ahorro":5800,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":7100 },
+  { "id":28,"edad":19,"sexo":"Femenino","area":"Química","semestre":"1.º–2.º","fuente":"Mixto","ingreso":23700,"gastoTotal":10600,"alimentacion":4900,"transporte":400,"ocio":2000,"ahorro":8000,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":4,"balance":13100 },
+  { "id":29,"edad":19,"sexo":"Masculino","area":"Agraria","semestre":"3.º–4.º","fuente":"Familia","ingreso":12300,"gastoTotal":11200,"alimentacion":3900,"transporte":600,"ocio":1800,"ahorro":1100,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":2,"balance":1100 },
+  { "id":30,"edad":22,"sexo":"Masculino","area":"Química","semestre":"5.º–6.º","fuente":"Mixto","ingreso":21600,"gastoTotal":13800,"alimentacion":4900,"transporte":300,"ocio":3500,"ahorro":4000,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":7800 },
+  { "id":31,"edad":18,"sexo":"Masculino","area":"Tecnología","semestre":"1.º–2.º","fuente":"Familia","ingreso":10900,"gastoTotal":10800,"alimentacion":4400,"transporte":1200,"ocio":700,"ahorro":0,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":100 },
+  { "id":32,"edad":25,"sexo":"Femenino","area":"Odontología","semestre":"9.º–10.º","fuente":"Familia","ingreso":6400,"gastoTotal":9700,"alimentacion":5200,"transporte":300,"ocio":1100,"ahorro":0,"deuda":2500,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":4,"balance":-3300 },
+  { "id":33,"edad":27,"sexo":"Masculino","area":"Derecho","semestre":"9.º–10.º","fuente":"Familia","ingreso":9300,"gastoTotal":7100,"alimentacion":2600,"transporte":300,"ocio":2000,"ahorro":2000,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":4,"balance":2200 },
+  { "id":34,"edad":21,"sexo":"Femenino","area":"Agraria","semestre":"5.º–6.º","fuente":"Familia","ingreso":14100,"gastoTotal":10200,"alimentacion":4400,"transporte":800,"ocio":1800,"ahorro":3500,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Cuaderno","estres":2,"balance":3900 },
+  { "id":35,"edad":27,"sexo":"Masculino","area":"Medicina","semestre":"9.º–10.º","fuente":"Trabajo","ingreso":13500,"gastoTotal":10700,"alimentacion":5000,"transporte":1800,"ocio":2300,"ahorro":1500,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":2800 },
+  { "id":36,"edad":19,"sexo":"Masculino","area":"Medicina","semestre":"3.º–4.º","fuente":"Trabajo","ingreso":14700,"gastoTotal":12800,"alimentacion":4800,"transporte":2100,"ocio":1500,"ahorro":1100,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":1900 },
+  { "id":37,"edad":23,"sexo":"Masculino","area":"Medicina","semestre":"7.º–8.º","fuente":"Trabajo","ingreso":23900,"gastoTotal":15100,"alimentacion":5800,"transporte":1800,"ocio":3100,"ahorro":7500,"deuda":1700,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":3,"balance":8800 },
+  { "id":38,"edad":21,"sexo":"Masculino","area":"Económica","semestre":"3.º–4.º","fuente":"Familia","ingreso":14600,"gastoTotal":12000,"alimentacion":4700,"transporte":800,"ocio":1400,"ahorro":1800,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":2600 },
+  { "id":39,"edad":26,"sexo":"Femenino","area":"Química","semestre":"9.º–10.º","fuente":"Familia","ingreso":16000,"gastoTotal":11300,"alimentacion":4800,"transporte":600,"ocio":1600,"ahorro":3900,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Excel","estres":2,"balance":4700 },
+  { "id":40,"edad":20,"sexo":"Femenino","area":"Tecnología","semestre":"3.º–4.º","fuente":"Beca","ingreso":10400,"gastoTotal":8300,"alimentacion":4600,"transporte":300,"ocio":2300,"ahorro":1100,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":2100 },
+  { "id":41,"edad":20,"sexo":"Masculino","area":"Medicina","semestre":"3.º–4.º","fuente":"Trabajo","ingreso":13300,"gastoTotal":9500,"alimentacion":3000,"transporte":1400,"ocio":2600,"ahorro":2100,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Excel","estres":4,"balance":3800 },
+  { "id":42,"edad":25,"sexo":"Masculino","area":"Derecho","semestre":"7.º–8.º","fuente":"Familia","ingreso":12100,"gastoTotal":9300,"alimentacion":3000,"transporte":900,"ocio":2400,"ahorro":2100,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":4,"balance":2800 },
+  { "id":43,"edad":23,"sexo":"Femenino","area":"Humanidades","semestre":"7.º–8.º","fuente":"Familia","ingreso":14600,"gastoTotal":10400,"alimentacion":3800,"transporte":900,"ocio":2300,"ahorro":2900,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":3,"balance":4200 },
+  { "id":44,"edad":17,"sexo":"Femenino","area":"Tecnología","semestre":"1.º–2.º","fuente":"Familia","ingreso":9100,"gastoTotal":5100,"alimentacion":1800,"transporte":800,"ocio":500,"ahorro":3100,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":4,"balance":4000 },
+  { "id":45,"edad":26,"sexo":"Femenino","area":"Odontología","semestre":"9.º–10.º","fuente":"Familia","ingreso":13400,"gastoTotal":9300,"alimentacion":4200,"transporte":1000,"ocio":200,"ahorro":1900,"deuda":900,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":5,"balance":4100 },
+  { "id":46,"edad":21,"sexo":"Femenino","area":"Tecnología","semestre":"3.º–4.º","fuente":"Familia","ingreso":9900,"gastoTotal":7000,"alimentacion":3100,"transporte":400,"ocio":1200,"ahorro":1600,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":2,"balance":2900 },
+  { "id":47,"edad":25,"sexo":"Masculino","area":"Derecho","semestre":"7.º–8.º","fuente":"Familia","ingreso":10100,"gastoTotal":8800,"alimentacion":5300,"transporte":300,"ocio":200,"ahorro":800,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":3,"balance":1300 },
+  { "id":48,"edad":25,"sexo":"Femenino","area":"Tecnología","semestre":"9.º–10.º","fuente":"Negocio propio","ingreso":10900,"gastoTotal":10900,"alimentacion":4300,"transporte":1100,"ocio":1200,"ahorro":0,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Control mental","estres":2,"balance":0 },
+  { "id":49,"edad":19,"sexo":"Femenino","area":"Agraria","semestre":"1.º–2.º","fuente":"Familia","ingreso":13200,"gastoTotal":9500,"alimentacion":3800,"transporte":800,"ocio":3400,"ahorro":3000,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":3700 },
+  { "id":50,"edad":19,"sexo":"Femenino","area":"Medicina","semestre":"3.º–4.º","fuente":"Negocio propio","ingreso":22800,"gastoTotal":13000,"alimentacion":6700,"transporte":300,"ocio":1300,"ahorro":7700,"deuda":0,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":3,"balance":9800 },
+  { "id":51,"edad":23,"sexo":"Masculino","area":"Química","semestre":"5.º–6.º","fuente":"Familia","ingreso":9400,"gastoTotal":8600,"alimentacion":4900,"transporte":300,"ocio":200,"ahorro":500,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":800 },
+  { "id":52,"edad":24,"sexo":"Masculino","area":"Agraria","semestre":"7.º–8.º","fuente":"Negocio propio","ingreso":26400,"gastoTotal":14300,"alimentacion":5600,"transporte":400,"ocio":1900,"ahorro":8100,"deuda":800,"usoPresupuesto":"Siempre","herramienta":"Excel","estres":3,"balance":12100 },
+  { "id":53,"edad":19,"sexo":"Femenino","area":"Medicina","semestre":"1.º–2.º","fuente":"Familia","ingreso":8200,"gastoTotal":6100,"alimentacion":2500,"transporte":400,"ocio":1400,"ahorro":1500,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"Control mental","estres":2,"balance":2100 },
+  { "id":54,"edad":19,"sexo":"Masculino","area":"Odontología","semestre":"1.º–2.º","fuente":"Familia","ingreso":10200,"gastoTotal":10900,"alimentacion":4600,"transporte":1600,"ocio":1400,"ahorro":0,"deuda":1700,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":5,"balance":-700 },
+  { "id":55,"edad":19,"sexo":"Femenino","area":"Económica","semestre":"1.º–2.º","fuente":"Familia","ingreso":9900,"gastoTotal":7400,"alimentacion":3300,"transporte":300,"ocio":500,"ahorro":2200,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Excel","estres":2,"balance":2500 },
+  { "id":56,"edad":17,"sexo":"Femenino","area":"Económica","semestre":"1.º–2.º","fuente":"Trabajo","ingreso":15400,"gastoTotal":10400,"alimentacion":3300,"transporte":1100,"ocio":1400,"ahorro":4400,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":5000 },
+  { "id":57,"edad":23,"sexo":"Femenino","area":"Odontología","semestre":"5.º–6.º","fuente":"Beca","ingreso":8700,"gastoTotal":11400,"alimentacion":4900,"transporte":300,"ocio":1300,"ahorro":0,"deuda":3000,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":4,"balance":-2700 },
+  { "id":58,"edad":22,"sexo":"Femenino","area":"Química","semestre":"5.º–6.º","fuente":"Beca","ingreso":13200,"gastoTotal":11300,"alimentacion":5400,"transporte":500,"ocio":2400,"ahorro":1300,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":1900 },
+  { "id":59,"edad":21,"sexo":"Masculino","area":"Medicina","semestre":"5.º–6.º","fuente":"Mixto","ingreso":28500,"gastoTotal":12600,"alimentacion":5100,"transporte":900,"ocio":2100,"ahorro":11700,"deuda":3000,"usoPresupuesto":"Siempre","herramienta":"App móvil","estres":2,"balance":15900 },
+  { "id":60,"edad":26,"sexo":"Femenino","area":"Tecnología","semestre":"9.º–10.º","fuente":"Familia","ingreso":16900,"gastoTotal":8500,"alimentacion":5000,"transporte":400,"ocio":2000,"ahorro":6700,"deuda":4300,"usoPresupuesto":"A veces","herramienta":"App móvil","estres":2,"balance":8400 },
+  { "id":61,"edad":23,"sexo":"Masculino","area":"Odontología","semestre":"7.º–8.º","fuente":"Familia","ingreso":14400,"gastoTotal":9300,"alimentacion":4100,"transporte":1300,"ocio":1000,"ahorro":2800,"deuda":0,"usoPresupuesto":"A veces","herramienta":"Cuaderno","estres":4,"balance":5100 },
+  { "id":62,"edad":22,"sexo":"Masculino","area":"Humanidades","semestre":"5.º–6.º","fuente":"Beca","ingreso":10500,"gastoTotal":10600,"alimentacion":4100,"transporte":1000,"ocio":500,"ahorro":0,"deuda":700,"usoPresupuesto":"A veces","herramienta":"Control mental","estres":4,"balance":-100 },
+  { "id":63,"edad":20,"sexo":"Femenino","area":"Derecho","semestre":"3.º–4.º","fuente":"Beca","ingreso":19300,"gastoTotal":12700,"alimentacion":4300,"transporte":1400,"ocio":2200,"ahorro":4200,"deuda":0,"usoPresupuesto":"Siempre","herramienta":"Cuaderno","estres":2,"balance":6600 },
+  { "id":64,"edad":25,"sexo":"Femenino","area":"Tecnología","semestre":"7.º–8.º","fuente":"Familia","ingreso":11800,"gastoTotal":7800,"alimentacion":3900,"transporte":1000,"ocio":200,"ahorro":1800,"deuda":0,"usoPresupuesto":"Nunca","herramienta":"No lleva control","estres":3,"balance":4000 }
+];
+
+function fixedData(){
+  return DATASET.map(r => ({...r}));
+}
+
+/* Formato */
+const formatters = {};
+function fmtNum(v, d = 2){
+  if(v === null || v === undefined || !Number.isFinite(v)) return '—';
+  const key = String(d);
+  if(!formatters[key]) formatters[key] = new Intl.NumberFormat('es-NI',{minimumFractionDigits:d, maximumFractionDigits:d});
+  return formatters[key].format(v);
+}
+function money0(v){ return Number.isFinite(v) ? 'C$ ' + fmtNum(v, 0) : '—'; }
+function money2(v){ return Number.isFinite(v) ? 'C$ ' + fmtNum(v, 2) : '—'; }
+function usdOf(v){ return Number.isFinite(v) ? 'US$ ' + fmtNum(v / CDF_PER_USD, 2) : '—'; }
+function moneyBoth(v, d = 0){
+  if(!Number.isFinite(v)) return '—';
+  return `C$ ${fmtNum(v, d)} (≈ US$ ${fmtNum(v / CDF_PER_USD, 2)})`;
+}
+function moneyCell(v, d = 0){
+  if(!Number.isFinite(v)) return '—';
+  const neg = v < 0;
+  const abs = Math.abs(v);
+  return `<span class="money-main">${neg ? '−' : ''}C$ ${fmtNum(abs, d)}</span><span class="money-alt">${neg ? '−' : ''}US$ ${fmtNum(abs / CDF_PER_USD, 2)}</span>`;
+}
+function valBoth(v, key, d = 2){
+  if(v === null || v === undefined || !Number.isFinite(v)) return '—';
+  const m = VARS[key] || {};
+  if(m.money) return moneyBoth(v, d);
+  return fmtValue(v, key, d);
+}
+function pctText(v, d = 1){ return Number.isFinite(v) ? fmtNum(v, d) + ' %' : '—'; }
+function fmtValue(v, key, d = 2){
+  if(v === null || v === undefined || !Number.isFinite(v)) return '—';
+  const m = VARS[key] || {};
+  if(m.money) return 'C$ ' + fmtNum(v, d);
+  if(m.unit === 'años') return fmtNum(v, 0) + ' años';
+  return fmtNum(v, d);
+}
+function fmtTable(v, key){
+  if(v === null || v === undefined || !Number.isFinite(v)) return '—';
+  return fmtNum(v, 0);
+}
+function qualLabel(key, value){
+  const m = VARS[key];
+  return m && m.labelFn ? m.labelFn(value) : String(value);
+}
+function statCard(label, value, hint = '', cls = ''){
+  return `<div class="stat ${cls}"><span class="label">${escapeHtml(label)}</span><span class="value">${value}</span>${hint ? `<span class="hint">${escapeHtml(hint)}</span>` : ''}</div>`;
+}
+
+/* Estadística descriptiva */
+function mean(arr){ return arr.length ? arr.reduce((s,v)=>s+v,0) / arr.length : NaN; }
+function variance(arr){
+  if(arr.length < 2) return null;
+  const m = mean(arr);
+  return arr.reduce((s,v)=>s + (v-m)*(v-m), 0) / (arr.length - 1);
+}
+function sd(arr){ const v = variance(arr); return v === null ? null : Math.sqrt(v); }
+function quantileSorted(sorted, p){
+  if(!sorted.length) return NaN;
+  if(sorted.length === 1) return sorted[0];
+  const pos = (sorted.length - 1) * p;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  return sorted[base + 1] !== undefined ? sorted[base] + rest * (sorted[base + 1] - sorted[base]) : sorted[base];
+}
+function getModes(arr){
+  if(!arr.length) return [];
+  const counts = new Map();
+  let max = 0;
+  arr.forEach(v => { const c = (counts.get(v) || 0) + 1; counts.set(v,c); if(c > max) max = c; });
+  if(max < 2) return [];
+  const modes = [];
+  counts.forEach((c,v) => { if(c === max) modes.push(v); });
+  return modes.sort((a,b)=>a-b);
+}
+function describe(values){
+  const n = values.length;
+  if(!n) return {n:0};
+  const sorted = [...values].sort((a,b)=>a-b);
+  const m = mean(values);
+  const v = variance(values);
+  const s = v === null ? null : Math.sqrt(v);
+  const q1 = quantileSorted(sorted, .25);
+  const q3 = quantileSorted(sorted, .75);
+  return {
+    n, mean:m, median:quantileSorted(sorted,.5), modes:getModes(values),
+    min:sorted[0], max:sorted[n-1], range:sorted[n-1]-sorted[0],
+    variance:v, sd:s, cv:(s !== null && m !== 0) ? s / Math.abs(m) * 100 : null,
+    q1, q3, iqr:q3-q1, p10:quantileSorted(sorted,.10), p50:quantileSorted(sorted,.50), p90:quantileSorted(sorted,.90)
+  };
+}
+function numericValues(key){ return state.filtered.map(d => d[key]).filter(v => Number.isFinite(v)); }
+
+/* =========================================================
+   2. FILTROS, NAVEGACIÓN, CUESTIONARIO Y BASE DE DATOS
+   ========================================================= */
+const DATA_COLUMNS = [
+  {key:'id',label:'ID'}, {key:'edad',label:'Edad',num:true}, {key:'sexo',label:'Sexo'},
+  {key:'area',label:'Facultad'}, {key:'semestre',label:'Semestre'}, {key:'fuente',label:'Fuente de ingresos'},
+  {key:'ingreso',label:'Ingreso (C$)',num:true}, {key:'gastoTotal',label:'Gasto total (C$)',num:true},
+  {key:'alimentacion',label:'Alimentación (C$)',num:true}, {key:'transporte',label:'Transporte (C$)',num:true},
+  {key:'ocio',label:'Ocio (C$)',num:true}, {key:'ahorro',label:'Ahorro (C$)',num:true},
+  {key:'deuda',label:'Deuda (C$)',num:true}, {key:'usoPresupuesto',label:'Uso de presupuesto'},
+  {key:'herramienta',label:'Herramienta'}, {key:'estres',label:'Estrés (1–5)',num:true},
+  {key:'balance',label:'Balance (C$)',num:true}
+];
+
+function applyFilters(){
+  const f = state.filters;
+  const q = normText(f.search.trim());
+  state.filtered = state.data.filter(d => {
+    if(f.area && d.area !== f.area) return false;
+    if(f.budget && d.usoPresupuesto !== f.budget) return false;
+    if(f.source && d.fuente !== f.source) return false;
+    if(q){
+      const hay = normText([d.id,d.edad,d.sexo,d.area,d.semestre,d.fuente,d.ingreso,d.gastoTotal,
+        d.alimentacion,d.transporte,d.ocio,d.ahorro,d.deuda,d.usoPresupuesto,d.herramienta,
+        d.estres,d.balance].join(' '));
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  sortFiltered();
+}
+function sortFiltered(){
+  const key = state.sortKey, dir = state.sortDir === 'asc' ? 1 : -1;
+  state.filtered.sort((a,b) => {
+    const va = a[key], vb = b[key];
+    let cmp;
+    if(typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+    else cmp = String(va).localeCompare(String(vb), 'es', {numeric:true, sensitivity:'base'});
+    return cmp * dir;
+  });
+}
+function syncFilterControls(){
+  $('searchInput').value = state.filters.search;
+  $('filterArea').value = state.filters.area;
+  $('filterBudget').value = state.filters.budget;
+  $('filterSource').value = state.filters.source;
+}
+function fillSelect(select, keys, selected, formatter){
+  select.innerHTML = keys.map(k => `<option value="${k}">${escapeHtml(formatter ? formatter(k) : VARS[k].label)}</option>`).join('');
+  if(selected && keys.includes(selected)) select.value = selected;
+}
+function fillValueSelect(select, values, selected, labeler){
+  select.innerHTML = values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(labeler ? labeler(v) : v)}</option>`).join('');
+  if(selected) select.value = selected;
+}
+function populateSelects(){
+  fillSelect($('qualVarSelect'), QUAL_KEYS, state.qualVar);
+  fillSelect($('quantVarSelect'), QUANT_KEYS, state.quantVar);
+  fillSelect($('descVarSelect'), QUANT_KEYS, state.descVar);
+  fillSelect($('chiA'), QUAL_KEYS, state.chiA);
+  fillSelect($('chiB'), QUAL_KEYS, state.chiB);
+  fillSelect($('corrX'), QUANT_KEYS, state.corrX);
+  fillSelect($('corrY'), QUANT_KEYS, state.corrY);
+  fillSelect($('regX'), QUANT_KEYS, state.regX);
+  fillSelect($('regY'), QUANT_KEYS, state.regY);
+  fillSelect($('chartBarVar'), QUAL_KEYS, state.chartBarVar);
+  fillSelect($('chartHistVar'), QUANT_KEYS, state.chartHistVar);
+  fillSelect($('chartPieVar'), QUAL_KEYS, state.chartPieVar);
+  fillSelect($('chartScatterX'), QUANT_KEYS, state.chartScatterX);
+  fillSelect($('chartScatterY'), QUANT_KEYS, state.chartScatterY);
+  fillSelect($('chartGroupVar'), QUAL_KEYS, state.chartGroupVar);
+  fillValueSelect($('filterArea'), AREA_NAMES, state.filters.area, v => v);
+  fillValueSelect($('filterBudget'), USOS, state.filters.budget, v => v);
+  fillValueSelect($('filterSource'), FUENTES, state.filters.source, v => v);
+  $('filterArea').insertAdjacentHTML('afterbegin','<option value="">Todas</option>');
+  $('filterBudget').insertAdjacentHTML('afterbegin','<option value="">Todos</option>');
+  $('filterSource').insertAdjacentHTML('afterbegin','<option value="">Todas</option>');
+}
+
+function renderQuestionnaire(){
+  $('questionnaireGrid').innerHTML = QUESTIONS.map(item => `
+    <article class="question-card">
+      <span class="question-num">${item.n}</span>
+      <h4>${escapeHtml(item.q)}</h4>
+      <div class="options">${item.options.map(o=>`<span class="option">${escapeHtml(o)}</span>`).join('')}</div>
+      <div class="meta"><b>Variable:</b> ${escapeHtml(VARS[item.var].label)}<br><b>Tipo:</b> ${escapeHtml(item.type)}<br><b>Codificación:</b> ${escapeHtml(item.coding)}</div>
+    </article>`).join('');
+  $('codebookTable').querySelector('tbody').innerHTML = QUESTIONS.map(item => `
+    <tr><td class="num">${item.n}</td><td>${escapeHtml(VARS[item.var].label)}</td><td>${escapeHtml(item.q)}</td><td>${escapeHtml(item.type)}</td><td>${escapeHtml(item.coding)}</td></tr>`).join('');
+}
+
+function renderHome(){
+  const d = state.filtered, n = d.length;
+  $('heroN').textContent = n;
+  $('kpiIngreso').textContent = n ? money0(mean(d.map(x=>x.ingreso))) : '—';
+  $('kpiGasto').textContent = n ? money0(mean(d.map(x=>x.gastoTotal))) : '—';
+  $('kpiAhorro').textContent = n ? money0(mean(d.map(x=>x.ahorro))) : '—';
+  $('kpiDeuda').textContent = n ? money0(mean(d.map(x=>x.deuda))) : '—';
+  $('kpiPresupuesto').textContent = n ? pctText(pct(d.filter(x=>x.usoPresupuesto==='Siempre').length,n),1) : '—';
+  $('kpiIngresoHint').textContent = n ? 'C$ por mes · equiv. ' + usdOf(mean(d.map(x=>x.ingreso))) : 'C$ por mes · US$';
+  $('kpiGastoHint').textContent = n ? 'C$ por mes · equiv. ' + usdOf(mean(d.map(x=>x.gastoTotal))) : 'C$ por mes · US$';
+  $('kpiAhorroHint').textContent = n ? 'C$ por mes · equiv. ' + usdOf(mean(d.map(x=>x.ahorro))) : 'C$ por mes · US$';
+  $('kpiDeudaHint').textContent = n ? 'C$ acumulados · equiv. ' + usdOf(mean(d.map(x=>x.deuda))) : 'C$ acumulados · US$';
+  if(!n){
+    $('homeSummary').innerHTML = '<p>No hay registros visibles con los filtros actuales. Limpia los filtros para recuperar la muestra.</p>';
+    return;
+  }
+  const ing = mean(d.map(x=>x.ingreso)), gas = mean(d.map(x=>x.gastoTotal)), aho = mean(d.map(x=>x.ahorro));
+  const debt = mean(d.map(x=>x.deuda));
+  const pctSiempre = pct(d.filter(x=>x.usoPresupuesto==='Siempre').length,n);
+  const pctNunca = pct(d.filter(x=>x.usoPresupuesto==='Nunca').length,n);
+  const r = computePearson(d,'ingreso','ahorro');
+  const rTxt = (r.r === null) ? 'no se puede calcular porque alguna variable no tiene variabilidad suficiente' :
+    `r = ${fmtNum(r.r,2)} (${interpretR(r.r)})`;
+  $('homeSummary').innerHTML = `
+    <p>En la muestra visible hay <strong>${n} estudiantes</strong>. El ingreso mensual promedio es <strong>${moneyBoth(ing,2)}</strong>, el gasto total promedio es <strong>${moneyBoth(gas,2)}</strong> y el ahorro medio es <strong>${moneyBoth(aho,2)}</strong>. La deuda media asciende a <strong>${moneyBoth(debt,2)}</strong>.</p>
+    <p>El <strong>${pctText(pctSiempre,1)}</strong> declara seguir siempre un presupuesto, mientras que el <strong>${pctText(pctNunca,1)}</strong> nunca lo hace. La relación lineal entre ingreso y ahorro es ${rTxt}.</p>
+    <p>Estos valores describen únicamente la muestra sintética visible. No constituyen evidencia causal ni permiten generalizar a todos los estudiantes universitarios.</p>`;
+}
+
+function renderDatabase(){
+  const d = state.filtered, total = state.data.length;
+  $('dbN').textContent = d.length;
+  $('dbNHint').textContent = `de ${total}`;
+  $('dbIngreso').textContent = d.length ? money0(mean(d.map(x=>x.ingreso))) : '—';
+  $('dbGasto').textContent = d.length ? money0(mean(d.map(x=>x.gastoTotal))) : '—';
+  $('dbAhorro').textContent = d.length ? money0(mean(d.map(x=>x.ahorro))) : '—';
+  $('dbIngresoHint').textContent = d.length ? 'C$ por mes · equiv. ' + usdOf(mean(d.map(x=>x.ingreso))) : 'C$ por mes · US$';
+  $('dbGastoHint').textContent = d.length ? 'C$ por mes · equiv. ' + usdOf(mean(d.map(x=>x.gastoTotal))) : 'C$ por mes · US$';
+  $('dbAhorroHint').textContent = d.length ? 'C$ por mes · equiv. ' + usdOf(mean(d.map(x=>x.ahorro))) : 'C$ por mes · US$';
+
+  $('dataTable').querySelector('thead').innerHTML = '<tr>' + DATA_COLUMNS.map(c => {
+    const active = state.sortKey === c.key;
+    const arrow = active ? (state.sortDir === 'asc' ? '▲' : '▼') : '';
+    return `<th class="sortable ${c.num?'num':''}" data-key="${c.key}" tabindex="0" role="button" aria-sort="${active ? (state.sortDir==='asc'?'ascending':'descending') : 'none'}">${escapeHtml(c.label)} <span class="sort-arrow">${arrow}</span></th>`;
+  }).join('') + '</tr>';
+
+  const tbody = $('dataTable').querySelector('tbody');
+  if(!d.length){
+    tbody.innerHTML = '';
+    $('dbTableWrap').classList.add('hidden');
+    $('emptyState').classList.remove('hidden');
+  } else {
+    $('dbTableWrap').classList.remove('hidden');
+    $('emptyState').classList.add('hidden');
+    tbody.innerHTML = d.map(row => `<tr>
+      <td class="num">${row.id}</td><td class="num">${row.edad}</td><td>${escapeHtml(row.sexo)}</td>
+      <td>${escapeHtml(row.area)}</td><td>${escapeHtml(row.semestre)}</td><td>${escapeHtml(row.fuente)}</td>
+      <td class="num">${moneyCell(row.ingreso)}</td><td class="num">${moneyCell(row.gastoTotal)}</td>
+      <td class="num">${moneyCell(row.alimentacion)}</td><td class="num">${moneyCell(row.transporte)}</td>
+      <td class="num">${moneyCell(row.ocio)}</td><td class="num">${moneyCell(row.ahorro)}</td>
+      <td class="num">${moneyCell(row.deuda)}</td><td>${escapeHtml(row.usoPresupuesto)}</td>
+      <td>${escapeHtml(row.herramienta)}</td><td class="num">${row.estres}</td>
+      <td class="num ${row.balance < 0 ? 'neg' : ''}">${moneyCell(row.balance)}</td>
+    </tr>`).join('');
+  }
+  $('btnCsv').disabled = d.length === 0;
+
+  const chips = [];
+  if(state.filters.search) chips.push(`búsqueda: “${escapeHtml(state.filters.search)}”`);
+  if(state.filters.area) chips.push(`facultad: ${escapeHtml(state.filters.area)}`);
+  if(state.filters.budget) chips.push(`presupuesto: ${escapeHtml(state.filters.budget)}`);
+  if(state.filters.source) chips.push(`fuente: ${escapeHtml(state.filters.source)}`);
+  $('filterSummary').innerHTML = chips.length
+    ? `<span>Mostrando <strong>${d.length}</strong> de ${total} registros.</span>${chips.map(c=>`<span class="filter-chip">${c}</span>`).join('')}`
+    : `<span>Mostrando los <strong>${total}</strong> registros de la base sintética.</span>`;
+}
+
+function getQualDist(key){
+  const meta = VARS[key];
+  const values = state.filtered.map(d => d[key]);
+  const n = values.length;
+  let order = meta.order ? [...meta.order] : [...new Set(values)].sort((a,b)=>String(a).localeCompare(String(b),'es'));
+  const rows = order.map(v => ({value:v, label:qualLabel(key,v), f:0}));
+  const index = new Map(rows.map((r,i)=>[String(r.value),i]));
+  values.forEach(v => { const i = index.get(String(v)); if(i !== undefined) rows[i].f++; });
+  let cum = 0;
+  rows.forEach(r => { r.h = n ? r.f/n : 0; r.pct = r.h*100; cum += r.f; r.cum = cum; r.cumPct = n ? cum/n*100 : 0; });
+  return {rows, n, meta};
+}
+
+function renderQualFrequency(){
+  const key = state.qualVar;
+  const dist = getQualDist(key);
+  const ordinal = !!dist.meta.ordinal;
+  $('qualFreqCaption').textContent = `Distribución de ${dist.meta.label.toLowerCase()} (n = ${dist.n} registros visibles).`;
+  $('qualFreqTable').querySelector('thead').innerHTML = `<tr><th>Categoría</th><th class="num">Frecuencia absoluta (f)</th><th class="num">Frecuencia relativa (h)</th><th class="num">Porcentaje</th>${ordinal?'<th class="num">Frecuencia acumulada (F)</th><th class="num">% acumulado</th>':''}</tr>`;
+  $('qualFreqTable').querySelector('tbody').innerHTML = dist.rows.map(r => `<tr>
+    <td>${escapeHtml(r.label)}</td><td class="num">${r.f}</td><td class="num">${fmtNum(r.h,3)}</td><td class="num">${pctText(r.pct,1)}</td>
+    ${ordinal?`<td class="num">${r.cum}</td><td class="num">${pctText(r.cumPct,1)}</td>`:''}
+  </tr>`).join('');
+  const top = dist.rows.reduce((a,b)=>b.f>a.f?b:a,dist.rows[0]);
+  if(!dist.n || !top || top.f===0){
+    $('qualInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>No hay registros visibles para esta variable. Ajusta los filtros para poder calcular la distribución.</p>';
+    return;
+  }
+  const second = [...dist.rows].sort((a,b)=>b.f-a.f)[1];
+  $('qualInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4>
+    <p>La categoría más frecuente es <strong>${escapeHtml(top.label)}</strong>, con <strong>${top.f} estudiantes</strong> (${pctText(top.pct,1)} del total visible).${second?` Le sigue <strong>${escapeHtml(second.label)}</strong> con ${second.f} (${pctText(second.pct,1)}).`:''}</p>
+    <p>${ordinal?'Como la variable es ordinal, la frecuencia acumulada indica cuántos estudiantes quedan hasta esa categoría; por ejemplo, el porcentaje acumulado de la última categoría debe llegar a 100 %.':'Como la variable es nominal, las categorías no tienen un orden natural; por eso no se acumulan frecuencias.'} La lectura es descriptiva y se refiere solo a los ${dist.n} registros visibles.</p>`;
+}
+
+function decimalsForStep(step){
+  const s = String(Math.round(step * 10000) / 10000);
+  const dot = s.indexOf('.');
+  return dot < 0 ? 0 : Math.min(3, s.length - dot - 1);
+}
+function niceStep(range, target){
+  if(!(range > 0)) return 1;
+  const raw = range / Math.max(1,target);
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const norm = raw / mag;
+  let nice;
+  if(norm <= 1) nice = 1;
+  else if(norm <= 2) nice = 2;
+  else if(norm <= 2.5) nice = 2.5;
+  else if(norm <= 5) nice = 5;
+  else nice = 10;
+  return nice * mag;
+}
+function getGrouped(key){
+  const values = numericValues(key);
+  const n = values.length;
+  const meta = VARS[key];
+  if(!n) return {rows:[], n:0, meta, step:1, min:null, max:null, k:0};
+  const min = Math.min(...values), max = Math.max(...values);
+  if(min === max){
+    return {rows:[{lo:min,hi:max,mark:min,f:n,h:1,pct:100,cum:n,cumPct:100}], n, meta, step:1, min, max, k:1};
+  }
+  const target = clamp(Math.ceil(1 + 3.322 * Math.log10(n)), 4, 8);
+  const step = niceStep(max-min, target);
+  const start = Math.floor(min/step) * step;
+  const end = Math.ceil(max/step) * step;
+  const k = Math.max(1, Math.round((end-start)/step));
+  const rows = [];
+  let cum = 0;
+  for(let i=0;i<k;i++){
+    const lo = start + i*step;
+    const hi = lo + step;
+    let f = 0;
+    values.forEach(v => {
+      const inside = (i < k-1) ? (v >= lo && v < hi) : (v >= lo && v <= hi);
+      if(inside) f++;
+    });
+    cum += f;
+    rows.push({lo,hi,mark:(lo+hi)/2,f,h:n?f/n:0,pct:n?f/n*100:0,cum,cumPct:n?cum/n*100:0});
+  }
+  return {rows, n, meta, step, min, max, k};
+}
+function boundText(v, step){
+  return fmtNum(v, decimalsForStep(step));
+}
+
+function renderQuantFrequency(){
+  const key = state.quantVar;
+  const g = getGrouped(key);
+  const unit = g.meta.money ? ' (C$ / US$)' : (g.meta.unit === 'años' ? ' (años)' : '');
+  $('quantFreqCaption').textContent = `Distribución agrupada de ${g.meta.label.toLowerCase()} (n = ${g.n}; ${g.k} intervalo${g.k===1?'':'s'} de clase).`;
+  $('quantFreqTable').querySelector('thead').innerHTML = `<tr><th>Intervalo de clase</th><th class="num">Marca de clase${unit}</th><th class="num">Frecuencia absoluta (f)</th><th class="num">Frecuencia relativa (h)</th><th class="num">Porcentaje</th><th class="num">Frecuencia acumulada (F)</th><th class="num">% acumulado</th></tr>`;
+  if(!g.n){
+    $('quantFreqTable').querySelector('tbody').innerHTML = '<tr><td colspan="7">No hay datos visibles para esta variable.</td></tr>';
+    $('quantInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>No hay registros visibles. Limpia los filtros o cambia la variable para calcular la distribución agrupada.</p>';
+    return;
+  }
+  $('quantFreqTable').querySelector('tbody').innerHTML = g.rows.map((r,i) => `<tr>
+    <td class="nowrap">${i===g.rows.length-1?'[':'['}${boundText(r.lo,g.step)} – ${boundText(r.hi,g.step)}${i===g.rows.length-1?']':')'}</td>
+    <td class="num">${g.meta.money ? moneyCell(r.mark) : fmtNum(r.mark, decimalsForStep(g.step))}</td><td class="num">${r.f}</td>
+    <td class="num">${fmtNum(r.h,3)}</td><td class="num">${pctText(r.pct,1)}</td>
+    <td class="num">${r.cum}</td><td class="num">${pctText(r.cumPct,1)}</td>
+  </tr>`).join('');
+  const modal = g.rows.reduce((a,b)=>b.f>a.f?b:a,g.rows[0]);
+  const s = describe(numericValues(key));
+  const meanTxt = g.meta.money ? moneyBoth(s.mean,2) : fmtValue(s.mean,key,2);
+  const medianTxt = g.meta.money ? moneyBoth(s.median,2) : fmtValue(s.median,key,2);
+  $('quantInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4>
+    <p>El intervalo con mayor frecuencia es <strong>[${boundText(modal.lo,g.step)} – ${boundText(modal.hi,g.step)}${g.rows.length && modal===g.rows[g.rows.length-1]?']':')'}</strong>, con <strong>${modal.f} estudiantes</strong> (${pctText(modal.pct,1)}). La tabla acumula ${g.n} observaciones visibles.</p>
+    <p>Con los valores individuales, la media es <strong>${meanTxt}</strong> y la mediana es <strong>${medianTxt}</strong>. La media y la mediana pueden diferir de la marca de clase del intervalo modal porque la agrupación pierde detalle.</p>`;
+}
+
+function renderDescriptive(){
+  const key = state.descVar;
+  const values = numericValues(key);
+  const s = describe(values);
+  const meta = VARS[key];
+  if(!s.n){
+    $('descStats').innerHTML = statCard('Registros visibles','0','No hay datos para resumir','plain');
+    $('percentileTable').querySelector('tbody').innerHTML = '<tr><td colspan="3">No hay datos visibles.</td></tr>';
+    $('descInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>No hay registros visibles para esta variable. Limpia los filtros para recuperar la muestra.</p>';
+  } else {
+    const modeText = s.modes.length ? s.modes.slice(0,3).map(v=>fmtValue(v,key,0)).join(', ') + (s.modes.length>3?'…':'') : 'Sin moda única';
+    const sdText = s.sd === null ? '—' : fmtValue(s.sd,key,2);
+    const varText = s.variance === null ? '—' : (meta.money ? 'C$² ' + fmtNum(s.variance,0) : fmtNum(s.variance,2));
+    const usdHint = (v) => meta.money && Number.isFinite(v) ? ' · ≈ ' + usdOf(v) : '';
+    $('descStats').innerHTML = [
+      statCard('n', String(s.n), 'registros visibles','plain'),
+      statCard('Media', fmtValue(s.mean,key,2), (meta.money?'C$ por mes':'') + usdHint(s.mean) || (meta.unit||''),'highlight'),
+      statCard('Mediana', fmtValue(s.median,key,2), 'percentil 50' + usdHint(s.median),'sage'),
+      statCard('Moda', modeText, 'valor más repetido','plain'),
+      statCard('Desv. estándar', sdText, 'muestral' + usdHint(s.sd),'sage'),
+      statCard('Varianza', varText, meta.money?'C$²':'unidades²','plain'),
+      statCard('Mínimo', fmtValue(s.min,key,2), 'valor menor' + usdHint(s.min),'plain'),
+      statCard('Máximo', fmtValue(s.max,key,2), 'valor mayor' + usdHint(s.max),'plain'),
+      statCard('Rango', fmtValue(s.range,key,2), 'máx. − mín.' + usdHint(s.range),'sage'),
+      statCard('CV', s.cv===null?'—':pctText(s.cv,1), 'dispersión relativa','highlight'),
+      statCard('Q1', fmtValue(s.q1,key,2), 'percentil 25' + usdHint(s.q1),'plain'),
+      statCard('Q3', fmtValue(s.q3,key,2), 'percentil 75' + usdHint(s.q3),'plain'),
+      statCard('IQR', fmtValue(s.iqr,key,2), 'Q3 − Q1' + usdHint(s.iqr),'sage')
+    ].join('');
+    const pRows = [['P10',.10,'10 % de los datos queda por debajo'],['P25 / Q1',.25,'primer cuartil'],['P50 / Mediana',.50,'divide la muestra en dos mitades'],['P75 / Q3',.75,'tercer cuartil'],['P90',.90,'90 % de los datos queda por debajo']];
+    $('percentileTable').querySelector('tbody').innerHTML = pRows.map(([lab,p,read]) => {
+      const val = quantileSorted([...values].sort((a,b)=>a-b),p);
+      return `<tr><td>${lab}</td><td class="num">${meta.money ? moneyCell(val) : fmtValue(val,key,2)}</td><td>${read}</td></tr>`;
+    }).join('');
+    const diff = Math.abs(s.mean - s.median);
+    const threshold = Math.abs(s.median) * 0.10 || 1;
+    const shape = diff > threshold ? 'La diferencia entre media y mediana sugiere cierta asimetría o la influencia de valores extremos.' : 'La media y la mediana son cercanas, lo que sugiere una distribución aproximadamente simétrica en el centro.';
+    const cvBand = s.cv === null ? '' : (s.cv < 15 ? 'La dispersión relativa es baja.' : s.cv < 30 ? 'La dispersión relativa es moderada.' : 'La dispersión relativa es alta: los valores están muy extendidos respecto de la media.');
+    $('descInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4>
+      <p>La media de <strong>${escapeHtml(meta.label.toLowerCase())}</strong> es <strong>${fmtValue(s.mean,key,2)}</strong> y la mediana es <strong>${fmtValue(s.median,key,2)}</strong>. La desviación estándar muestral es <strong>${sdText}</strong>, y el coeficiente de variación es <strong>${s.cv===null?'—':pctText(s.cv,1)}</strong>. ${cvBand}</p>
+      <p>${shape} El 50 % central de los datos se ubica aproximadamente entre <strong>${fmtValue(s.q1,key,2)}</strong> y <strong>${fmtValue(s.q3,key,2)}</strong> (IQR = ${fmtValue(s.iqr,key,2)}). ${s.modes.length ? 'La moda se reporta como referencia, pero en datos continuos puede no ser única.' : 'No hay una moda única porque los valores se repiten poco.'}</p>`;
+  }
+
+  const rows = QUANT_KEYS.map(k => {
+    const st = describe(numericValues(k));
+    const money = VARS[k].money;
+    const unit = money ? ' (C$ · US$)' : (VARS[k].unit === 'años' ? ' (años)' : '');
+    const cell = (v, d = 2) => !Number.isFinite(v) ? '—' : (money ? moneyCell(v, d) : fmtNum(v, d));
+    return `<tr><td>${escapeHtml(VARS[k].label)}${unit}</td><td class="num">${st.n}</td><td class="num">${cell(st.mean)}</td><td class="num">${cell(st.median)}</td><td class="num">${cell(st.sd)}</td><td class="num">${cell(st.min)}</td><td class="num">${cell(st.max)}</td></tr>`;
+  }).join('');
+  $('summaryTable').querySelector('tbody').innerHTML = rows;
+}
+
+/* =========================================================
+   3. INFERENCIA: CHI-CUADRADO, PEARSON Y REGRESIÓN
+   ========================================================= */
+function logGamma(x){
+  const g = 7;
+  const c = [0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,
+    -176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
+  x -= 1;
+  let a = c[0];
+  const t = x + g + 0.5;
+  for(let i=1;i<g+2;i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function gammaincP(a, x){
+  if(x < 0 || a <= 0) return NaN;
+  if(x === 0) return 0;
+  if(x < a + 1){
+    let ap = a, sum = 1 / a, del = sum;
+    for(let n=1;n<300;n++){
+      ap += 1; del *= x / ap; sum += del;
+      if(Math.abs(del) < Math.abs(sum) * 1e-13) break;
+    }
+    return sum * Math.exp(-x + a * Math.log(x) - logGamma(a));
+  }
+  return 1 - gammaincQ(a, x);
+}
+function gammaincQ(a, x){
+  if(x < 0 || a <= 0) return NaN;
+  if(x === 0) return 1;
+  if(x < a + 1) return 1 - gammaincP(a, x);
+  let b = x + 1 - a, c = 1 / 1e-300, d = 1 / b, h = d;
+  for(let i=1;i<300;i++){
+    const an = -i * (i - a);
+    b += 2;
+    d = an * d + b; if(Math.abs(d) < 1e-300) d = 1e-300;
+    c = b + an / c; if(Math.abs(c) < 1e-300) c = 1e-300;
+    d = 1 / d;
+    const del = d * c; h *= del;
+    if(Math.abs(del - 1) < 1e-13) break;
+  }
+  return Math.exp(-x + a * Math.log(x) - logGamma(a)) * h;
+}
+function chiSquarePValue(chi2, df){
+  if(!Number.isFinite(chi2) || !Number.isFinite(df) || df <= 0) return NaN;
+  return gammaincQ(df / 2, chi2 / 2);
+}
+function betacf(a, b, x){
+  const MAXIT = 300, EPS = 3e-14, FPMIN = 1e-300;
+  const qab = a + b, qap = a + 1, qam = a - 1;
+  let c = 1, d = 1 - qab * x / qap;
+  if(Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1 / d;
+  let h = d;
+  for(let m=1;m<=MAXIT;m++){
+    const m2 = 2 * m;
+    let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if(Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if(Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if(Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c; if(Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c; h *= del;
+    if(Math.abs(del - 1) < EPS) break;
+  }
+  return h;
+}
+function betai(a, b, x){
+  if(x <= 0) return 0;
+  if(x >= 1) return 1;
+  const bt = Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  if(x < (a + 1) / (a + b + 2)) return bt * betacf(a, b, x) / a;
+  return 1 - bt * betacf(b, a, 1 - x) / b;
+}
+function studentTwoTailedP(t, df){
+  if(!Number.isFinite(t) || df <= 0) return NaN;
+  return betai(df / 2, 0.5, df / (df + t * t));
+}
+function fmtP(p){
+  if(!Number.isFinite(p)) return '—';
+  if(p < 0.001) return '< 0,001';
+  return fmtNum(p, 4);
+}
+function interpretR(r){
+  if(r === null || !Number.isFinite(r)) return 'sin cálculo';
+  const a = Math.abs(r);
+  const dir = r > 0 ? 'positiva' : (r < 0 ? 'negativa' : 'nula');
+  let fuerza;
+  if(a < 0.10) fuerza = 'prácticamente nula';
+  else if(a < 0.30) fuerza = 'débil';
+  else if(a < 0.50) fuerza = 'moderada';
+  else if(a < 0.70) fuerza = 'moderada a fuerte';
+  else if(a < 0.90) fuerza = 'fuerte';
+  else fuerza = 'muy fuerte';
+  return `relación lineal ${dir} ${fuerza}`;
+}
+function interpretV(v){
+  if(!Number.isFinite(v)) return '—';
+  if(v < 0.10) return 'asociación despreciable';
+  if(v < 0.30) return 'asociación débil';
+  if(v < 0.50) return 'asociación moderada';
+  return 'asociación fuerte';
+}
+function computePearson(data, keyX, keyY){
+  const pairs = data.map(d => [d[keyX], d[keyY]]).filter(([x,y]) => Number.isFinite(x) && Number.isFinite(y));
+  const n = pairs.length;
+  if(n < 3) return {n, r:null, r2:null, p:null, t:null};
+  const mx = mean(pairs.map(p=>p[0])), my = mean(pairs.map(p=>p[1]));
+  let sxx=0, syy=0, sxy=0;
+  pairs.forEach(([x,y]) => { const dx=x-mx, dy=y-my; sxx+=dx*dx; syy+=dy*dy; sxy+=dx*dy; });
+  if(sxx <= 0 || syy <= 0) return {n, r:null, r2:null, p:null, t:null, mx, my};
+  const r = clamp(sxy / Math.sqrt(sxx * syy), -1, 1);
+  const r2 = r * r;
+  let t = null, p = null;
+  if(Math.abs(r) >= 1){ t = Infinity; p = 0; }
+  else { t = r * Math.sqrt((n-2) / (1-r2)); p = studentTwoTailedP(t, n-2); }
+  return {n, r, r2, p, t, mx, my, sxx, syy, sxy};
+}
+function computeRegression(data, keyX, keyY){
+  const pairs = data.map(d => [d[keyX], d[keyY]]).filter(([x,y]) => Number.isFinite(x) && Number.isFinite(y));
+  const n = pairs.length;
+  if(n < 3) return {n, model:null, reason:'Se necesitan al menos 3 pares de datos.'};
+  const mx = mean(pairs.map(p=>p[0])), my = mean(pairs.map(p=>p[1]));
+  let sxx=0, syy=0, sxy=0;
+  pairs.forEach(([x,y]) => { const dx=x-mx, dy=y-my; sxx+=dx*dx; syy+=dy*dy; sxy+=dx*dy; });
+  if(sxx <= 0) return {n, model:null, reason:'La variable X no tiene variabilidad suficiente para estimar una pendiente.'};
+  const slope = sxy / sxx;
+  const intercept = my - slope * mx;
+  const pear = computePearson(data, keyX, keyY);
+  const r2 = pear.r2 === null ? null : pear.r2;
+  const sse = pairs.reduce((s,[x,y]) => { const e = y - (intercept + slope*x); return s + e*e; }, 0);
+  const se = n > 2 ? Math.sqrt(sse / (n-2)) : null;
+  return {n, model:{slope, intercept, r2, sse, se, p:pear.p, r:pear.r}, pairs, mx, my};
+}
+
+function buildContingency(data, keyA, keyB){
+  if(keyA === keyB) return {error:'same'};
+  if(!data.length) return {error:'empty'};
+  const metaA = VARS[keyA], metaB = VARS[keyB];
+  const allA = metaA.order ? [...metaA.order] : [...new Set(data.map(d=>d[keyA]))].sort();
+  const allB = metaB.order ? [...metaB.order] : [...new Set(data.map(d=>d[keyB]))].sort();
+  const rows = allA.filter(a => data.some(d => String(d[keyA]) === String(a)));
+  const cols = allB.filter(b => data.some(d => String(d[keyB]) === String(b)));
+  if(rows.length < 2 || cols.length < 2) return {error:'categories'};
+  const matrix = rows.map(()=>cols.map(()=>0));
+  data.forEach(d => {
+    const i = rows.findIndex(a => String(a) === String(d[keyA]));
+    const j = cols.findIndex(b => String(b) === String(d[keyB]));
+    if(i >= 0 && j >= 0) matrix[i][j]++;
+  });
+  const rowTotals = matrix.map(r => r.reduce((s,v)=>s+v,0));
+  const colTotals = cols.map((_,j) => matrix.reduce((s,r)=>s+r[j],0));
+  const n = rowTotals.reduce((s,v)=>s+v,0);
+  const expected = matrix.map((r,i) => r.map((_,j) => n ? rowTotals[i] * colTotals[j] / n : 0));
+  let chi2 = 0;
+  expected.forEach((r,i)=>r.forEach((e,j)=>{ if(e>0) chi2 += Math.pow(matrix[i][j]-e,2)/e; }));
+  const df = (rows.length-1)*(cols.length-1);
+  const p = chiSquarePValue(chi2, df);
+  const v = (n && df > 0) ? Math.sqrt(chi2 / (n * Math.min(rows.length-1, cols.length-1))) : null;
+  let low = 0, cells = 0, belowOne = 0;
+  expected.forEach(r=>r.forEach(e=>{ cells++; if(e < 5) low++; if(e < 1) belowOne++; }));
+  return {rows, cols, matrix, rowTotals, colTotals, n, expected, chi2, df, p, v, low, cells, belowOne,
+    metaA, metaB};
+}
+
+function renderChiSquare(){
+  const keyA = state.chiA, keyB = state.chiB;
+  const labelA = VARS[keyA].label, labelB = VARS[keyB].label;
+  $('chiHypotheses').innerHTML = `<div><b>H0:</b> ${escapeHtml(labelA)} y ${escapeHtml(labelB)} son independientes (no hay asociación).</div><div><b>H1:</b> Existe asociación entre ${escapeHtml(labelA)} y ${escapeHtml(labelB)}.</div>`;
+  const obsHead = $('chiObsTable').querySelector('thead');
+  const obsBody = $('chiObsTable').querySelector('tbody');
+  const obsFoot = $('chiObsTable').querySelector('tfoot');
+  const expHead = $('chiExpTable').querySelector('thead');
+  const expBody = $('chiExpTable').querySelector('tbody');
+
+  if(keyA === keyB){
+    obsHead.innerHTML = ''; obsBody.innerHTML = '<tr><td>Selecciona dos variables distintas.</td></tr>'; obsFoot.innerHTML = '';
+    expHead.innerHTML = ''; expBody.innerHTML = '<tr><td>Selecciona dos variables distintas.</td></tr>';
+    $('chiResults').innerHTML = statCard('Estado','Sin cálculo','Variables repetidas','plain');
+    $('chiAssumptions').innerHTML = '<h4>Supuestos</h4><p>No se puede contrastar la independencia de una variable consigo misma.</p>';
+    $('chiInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>Elige dos variables cualitativas diferentes para construir la tabla de contingencia.</p>';
+    return;
+  }
+  const ct = buildContingency(state.filtered, keyA, keyB);
+  if(ct.error){
+    const msg = ct.error === 'empty' ? 'No hay registros visibles para construir la tabla.' : (ct.error === 'categories' ? 'Cada variable necesita al menos dos categorías con datos.' : 'No se pudo construir la tabla.');
+    obsHead.innerHTML = ''; obsBody.innerHTML = `<tr><td>${msg}</td></tr>`; obsFoot.innerHTML = '';
+    expHead.innerHTML = ''; expBody.innerHTML = `<tr><td>${msg}</td></tr>`;
+    $('chiResults').innerHTML = statCard('Estado','Sin cálculo',msg,'plain');
+    $('chiAssumptions').innerHTML = '<h4>Supuestos</h4><p>No hay información suficiente para revisar las frecuencias esperadas.</p>';
+    $('chiInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4><p>${msg} Ajusta los filtros o selecciona otras variables.</p>`;
+    return;
+  }
+
+  const headA = `<th>${escapeHtml(labelA)} · ${escapeHtml(labelB)}</th>` + ct.cols.map(c=>`<th class="num">${escapeHtml(qualLabel(keyB,c))}</th>`).join('') + '<th class="num">Total</th>';
+  obsHead.innerHTML = `<tr>${headA}</tr>`;
+  obsBody.innerHTML = ct.matrix.map((row,i)=>`<tr><td>${escapeHtml(qualLabel(keyA,ct.rows[i]))}</td>${row.map(v=>`<td class="num">${v}</td>`).join('')}<td class="num"><strong>${ct.rowTotals[i]}</strong></td></tr>`).join('');
+  obsFoot.innerHTML = `<tr><td>Total</td>${ct.colTotals.map(v=>`<td class="num">${v}</td>`).join('')}<td class="num">${ct.n}</td></tr>`;
+  expHead.innerHTML = `<tr>${headA}</tr>`;
+  expBody.innerHTML = ct.expected.map((row,i)=>`<tr><td>${escapeHtml(qualLabel(keyA,ct.rows[i]))}</td>${row.map(e=>`<td class="num ${e<5?'low-exp':''}" title="${e<5?'Frecuencia esperada menor que 5':''}">${fmtNum(e,2)}</td>`).join('')}<td class="num"><strong>${ct.rowTotals[i]}</strong></td></tr>`).join('');
+
+  const decision = ct.p < 0.05 ? 'Se rechaza H0' : 'No se rechaza H0';
+  $('chiResults').innerHTML = [
+    statCard('Chi-cuadrado', fmtNum(ct.chi2,2), 'estadístico de contraste','highlight'),
+    statCard('Grados de libertad', String(ct.df), '(filas − 1)(columnas − 1)','plain'),
+    statCard('Valor p', fmtP(ct.p), 'α = 0,05','sage'),
+    statCard('V de Cramér', ct.v===null?'—':fmtNum(ct.v,3), interpretV(ct.v),'plain'),
+    statCard('n', String(ct.n), 'registros visibles','plain'),
+    statCard('Decisión', decision, ct.p < 0.05 ? 'hay evidencia de asociación' : 'no hay evidencia suficiente','highlight')
+  ].join('');
+
+  let assumption = `<h4>Revisión de supuestos</h4><p>${ct.low} de ${ct.cells} celdas (${pctText(pct(ct.low,ct.cells),1)}) tienen frecuencia esperada menor que 5.`;
+  if(ct.belowOne) assumption += ` Además, ${ct.belowOne} celda${ct.belowOne===1?' tiene':'s tienen'} frecuencia esperada menor que 1.`;
+  assumption += '</p>';
+  if(ct.low === 0) assumption += '<p>La aproximación chi-cuadrado es razonable: todas las frecuencias esperadas son al menos 5.</p>';
+  else if(pct(ct.low,ct.cells) > 20) assumption += '<p class="neg">Más del 20 % de las celdas tiene frecuencias esperadas bajas. La aproximación puede ser poco fiable; conviene agrupar categorías o ampliar la muestra antes de concluir.</p>';
+  else assumption += '<p>Hay algunas celdas con frecuencias esperadas bajas. Interpreta el valor p con cautela y revisa si es posible agrupar categorías.</p>';
+  $('chiAssumptions').innerHTML = assumption;
+
+  const decisionText = ct.p < 0.05
+    ? `Como <strong>p = ${fmtP(ct.p)} &lt; 0,05</strong>, se rechaza H0: hay evidencia estadística de asociación entre <strong>${escapeHtml(labelA)}</strong> y <strong>${escapeHtml(labelB)}</strong> en la muestra visible.`
+    : `Como <strong>p = ${fmtP(ct.p)} ≥ 0,05</strong>, no se rechaza H0: no hay evidencia estadística suficiente para afirmar que <strong>${escapeHtml(labelA)}</strong> y <strong>${escapeHtml(labelB)}</strong> estén asociadas en la muestra visible.`;
+  const directionNote = ct.v === null ? '' : ` La V de Cramér es ${fmtNum(ct.v,3)}, lo que corresponde a una ${interpretV(ct.v)}.`;
+  $('chiInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4>
+    <p>${decisionText}${directionNote}</p>
+    <p>El estadístico chi-cuadrado compara las frecuencias observadas con las que se esperarían si las variables fueran independientes. Un valor p pequeño indica que la tabla observada sería poco probable bajo independencia; no mide por sí solo la fuerza de la relación ni demuestra causalidad.</p>`;
+}
+
+function renderCorrelation(){
+  const keyX = state.corrX, keyY = state.corrY;
+  const labelX = VARS[keyX].label, labelY = VARS[keyY].label;
+  $('corrHypotheses').innerHTML = `<div><b>H0:</b> ρ = 0 (no hay correlación lineal entre ${escapeHtml(labelX)} y ${escapeHtml(labelY)}).</div><div><b>H1:</b> ρ ≠ 0 (existe correlación lineal).</div>`;
+  if(keyX === keyY){
+    $('corrResults').innerHTML = statCard('Estado','Sin cálculo','Selecciona variables distintas','plain');
+    $('corrInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>Una variable está perfectamente correlacionada consigo misma, pero eso no aporta información sobre el tema. Elige dos variables cuantitativas diferentes.</p>';
+    drawScatterChart($('chartCorr'), [], keyX, keyY);
+    return;
+  }
+  const p = computePearson(state.filtered, keyX, keyY);
+  if(p.r === null){
+    $('corrResults').innerHTML = statCard('Estado','Sin cálculo',p.n<3?'Se necesitan al menos 3 pares':'Sin variabilidad en X o Y','plain');
+    $('corrInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>No es posible calcular una correlación lineal con los datos visibles. Revisa los filtros o selecciona otras variables con mayor variabilidad.</p>';
+    drawScatterChart($('chartCorr'), [], keyX, keyY);
+    return;
+  }
+  const sig = p.p < 0.05;
+  $('corrResults').innerHTML = [
+    statCard('n', String(p.n), 'pares completos','plain'),
+    statCard('Coeficiente r', fmtNum(p.r,3), interpretR(p.r),'highlight'),
+    statCard('R²', fmtNum(p.r2,3), pctText(p.r2*100,1)+' de variabilidad compartida','sage'),
+    statCard('Valor p', fmtP(p.p), sig?'significativo al 5 %':'no significativo al 5 %','plain'),
+    statCard('Estadístico t', Number.isFinite(p.t)?fmtNum(p.t,2):'—', `gl = ${p.n-2}`,'plain')
+  ].join('');
+  $('corrInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4>
+    <p>El coeficiente de Pearson es <strong>r = ${fmtNum(p.r,3)}</strong>, lo que indica una <strong>${interpretR(p.r)}</strong> entre ${escapeHtml(labelX.toLowerCase())} y ${escapeHtml(labelY.toLowerCase())}. El signo ${p.r>=0?'positivo indica que ambas variables tienden a moverse en la misma dirección':'negativo indica que, cuando una aumenta, la otra tiende a disminuir'}.</p>
+    <p>El <strong>R² = ${fmtNum(p.r2,3)}</strong> significa que aproximadamente el <strong>${pctText(p.r2*100,1)}</strong> de la variabilidad de ${escapeHtml(labelY.toLowerCase())} se asocia linealmente con ${escapeHtml(labelX.toLowerCase())} en esta muestra. El valor p = <strong>${fmtP(p.p)}</strong>; ${sig?'se rechaza H0 de ausencia de correlación al 5 %':'no se rechaza H0 de ausencia de correlación al 5 %'}.</p>
+    <p>Recuerda que la correlación describe asociación lineal, no causalidad. La muestra es sintética y transversal; no permite concluir que cambiar una variable provoque cambios en la otra.</p>`;
+  drawScatterChart($('chartCorr'), state.filtered, keyX, keyY);
+}
+
+function renderRegression(){
+  const keyX = state.regX, keyY = state.regY;
+  const labelX = VARS[keyX].label, labelY = VARS[keyY].label;
+  const reg = computeRegression(state.filtered, keyX, keyY);
+  const m = VARS[keyX], yMeta = VARS[keyY];
+  const xUnit = m.money ? 'C$' : (m.unit || '');
+  const yUnit = yMeta.money ? 'C$' : (yMeta.unit || '');
+  if(keyX === keyY){
+    $('regEquation').innerHTML = 'Selecciona dos variables distintas para estimar el modelo.';
+    $('regResults').innerHTML = statCard('Estado','Sin cálculo','Variables repetidas','plain');
+    $('regTable').querySelector('tbody').innerHTML = '<tr><td colspan="5">Selecciona variables distintas.</td></tr>';
+    $('regInterp').innerHTML = '<h4>¿Cómo se interpreta?</h4><p>No tiene sentido explicar una variable con ella misma. Elige una variable predictora y una de respuesta diferentes.</p>';
+    $('predRangeNote').textContent = 'La predicción estará disponible cuando elijas dos variables distintas.';
+    $('predResult').classList.add('hidden');
+    drawScatterChart($('chartReg'), [], keyX, keyY);
+    return;
+  }
+  if(!reg.model){
+    $('regEquation').innerHTML = 'Modelo no estimable con los datos visibles.';
+    $('regResults').innerHTML = statCard('Estado','Sin cálculo',reg.reason,'plain');
+    $('regTable').querySelector('tbody').innerHTML = `<tr><td colspan="5">${escapeHtml(reg.reason||'Sin datos suficientes.')}</td></tr>`;
+    $('regInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4><p>${escapeHtml(reg.reason||'No hay datos suficientes.')} Ajusta los filtros o elige otras variables.</p>`;
+    $('predResult').classList.add('hidden');
+    drawScatterChart($('chartReg'), [], keyX, keyY);
+    return;
+  }
+  const {slope, intercept, r2, se, p} = reg.model;
+  const sign = slope >= 0 ? '+' : '−';
+  $('regEquation').innerHTML = `Ŷ = ${fmtNum(intercept,2)} ${sign} ${fmtNum(Math.abs(slope),4)} · X<small>Ŷ = ${escapeHtml(labelY)} estimado; X = ${escapeHtml(labelX)}. Pendiente en ${escapeHtml(yUnit)} por cada ${escapeHtml(xUnit)} de X.</small>`;
+  $('regResults').innerHTML = [
+    statCard('n', String(reg.n), 'pares completos','plain'),
+    statCard('Pendiente (b)', fmtNum(slope,4), `${yUnit} por unidad de X`,'highlight'),
+    statCard('Intercepto (a)', fmtNum(intercept,2), 'Y estimado cuando X = 0','plain'),
+    statCard('R²', fmtNum(r2,3), pctText(r2*100,1)+' de variabilidad explicada','sage'),
+    statCard('Error típico', se===null?'—':fmtNum(se,2), 'residual estándar','plain'),
+    statCard('Valor p', fmtP(p), 'pendiente distinta de 0','highlight')
+  ].join('');
+  const per100 = slope * 100;
+  const slopeTxt = Math.abs(per100) >= 1
+    ? `Por cada <strong>100 ${escapeHtml(xUnit)}</strong> adicionales de ${escapeHtml(labelX.toLowerCase())}, ${escapeHtml(labelY.toLowerCase())} cambia en promedio <strong>${sign==='+'?'+':'−'}${fmtNum(Math.abs(per100),2)} ${escapeHtml(yUnit)}</strong>.`
+    : `Por cada unidad adicional de ${escapeHtml(labelX.toLowerCase())}, ${escapeHtml(labelY.toLowerCase())} cambia en promedio <strong>${fmtNum(slope,4)} ${escapeHtml(yUnit)}</strong>.`;
+  const interceptWarn = (reg.mx - 0) > 0 ? `El intercepto (${fmtNum(intercept,2)}) representa el valor estimado de Y cuando X = 0; como X = 0 está fuera del rango observado (${fmtNum(Math.min(...state.filtered.map(d=>d[keyX])),0)} a ${fmtNum(Math.max(...state.filtered.map(d=>d[keyX])),0)} ${escapeHtml(xUnit)}), no debe interpretarse como una predicción real.` : '';
+  $('regInterp').innerHTML = `<h4>¿Cómo se interpreta?</h4>
+    <p>La ecuación estimada es <strong>Ŷ = ${fmtNum(intercept,2)} ${sign} ${fmtNum(Math.abs(slope),4)} · X</strong>. ${slopeTxt}</p>
+    <p>El <strong>R² = ${fmtNum(r2,3)}</strong> indica que el modelo explica aproximadamente el <strong>${pctText(r2*100,1)}</strong> de la variabilidad de ${escapeHtml(labelY.toLowerCase())}. El error típico residual es ${se===null?'—':fmtNum(se,2)} ${escapeHtml(yUnit)}. ${interceptWarn}</p>
+    <p>La recta resume una tendencia lineal en la muestra visible. No demuestra causalidad y no debería usarse para predecir fuera del rango de X observado. Revisa el diagrama de dispersión y los residuales antes de confiar en el modelo.</p>`;
+  const pairCell = (v, k, d = 2) => VARS[k].money ? moneyCell(v, d) : fmtNum(v, d);
+  $('regTable').querySelector('tbody').innerHTML = reg.pairs.map(([x,y],i)=>{
+    const yhat = intercept + slope*x;
+    const res = y - yhat;
+    return `<tr><td>${i+1}</td><td class="num">${pairCell(x,keyX,0)}</td><td class="num">${pairCell(y,keyY,0)}</td><td class="num">${pairCell(yhat,keyY,2)}</td><td class="num ${res<0?'neg':''}">${VARS[keyY].money ? moneyCell(res,2) : (res<0?'−':'') + fmtNum(Math.abs(res),2)}</td></tr>`;
+  }).join('');
+  const xs = state.filtered.map(d=>d[keyX]).filter(Number.isFinite);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  $('predRangeNote').textContent = `Rango observado de X (${labelX}): ${fmtValue(minX,keyX,0)} a ${fmtValue(maxX,keyX,0)}. La predicción es prudente solo dentro de este intervalo.`;
+  $('predLabel').textContent = `Valor de X (${labelX}, ${xUnit})`;
+  updatePrediction();
+  drawScatterChart($('chartReg'), state.filtered, keyX, keyY);
+}
+
+function updatePrediction(){
+  const keyX = state.regX, keyY = state.regY;
+  const input = $('predX');
+  const box = $('predResult');
+  if(keyX === keyY || !input.value.trim()){ box.classList.add('hidden'); return; }
+  const x = Number(input.value);
+  if(!Number.isFinite(x)){
+    box.classList.remove('hidden'); box.classList.add('warn');
+    box.textContent = 'Ingresa un valor numérico válido para X.';
+    return;
+  }
+  const reg = computeRegression(state.filtered, keyX, keyY);
+  if(!reg.model){
+    box.classList.remove('hidden'); box.classList.add('warn');
+    box.textContent = reg.reason || 'No se puede calcular la predicción.';
+    return;
+  }
+  const xs = state.filtered.map(d=>d[keyX]).filter(Number.isFinite);
+  if(!xs.length){ box.classList.add('hidden'); return; }
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const yhat = reg.model.intercept + reg.model.slope * x;
+  const outside = x < minX || x > maxX;
+  box.classList.remove('hidden');
+  box.classList.toggle('warn', outside);
+  box.innerHTML = `<strong>Predicción:</strong> si X = ${fmtValue(x,keyX,2)}, el valor estimado de ${escapeHtml(VARS[keyY].label.toLowerCase())} es <strong>${valBoth(yhat,keyY,2)}</strong>. ${outside?`<br><strong>Atención:</strong> el valor está fuera del rango observado (${fmtValue(minX,keyX,0)} a ${fmtValue(maxX,keyX,0)}). La extrapolación es poco fiable.`:'El valor está dentro del rango observado; aun así, es una estimación promedio, no una garantía individual.'}`;
+}
+
+function renderFinalSummary(){
+  const d = state.filtered, n = d.length;
+  if(!n){
+    $('finalSummary').innerHTML = '<p>No hay registros visibles. Limpia los filtros para generar la síntesis.</p>';
+    return;
+  }
+  const ing = mean(d.map(x=>x.ingreso)), gas = mean(d.map(x=>x.gastoTotal)), aho = mean(d.map(x=>x.ahorro));
+  const pctSiempre = pct(d.filter(x=>x.usoPresupuesto==='Siempre').length,n);
+  const pctNunca = pct(d.filter(x=>x.usoPresupuesto==='Nunca').length,n);
+  const r = computePearson(d,'ingreso','ahorro');
+  const reg = computeRegression(d,'ingreso','ahorro');
+  const chi = buildContingency(d,'area','usoPresupuesto');
+  const chiTxt = chi.error ? 'no se pudo calcular con los filtros actuales' : (chi.p<0.05 ? `se detecta asociación (p = ${fmtP(chi.p)}; V = ${fmtNum(chi.v,3)})` : `no se detecta asociación suficiente (p = ${fmtP(chi.p)})`);
+  const regTxt = reg.model ? `un R² de ${fmtNum(reg.model.r2,3)}` : 'un modelo no estimable';
+  $('finalSummary').innerHTML = `
+    <p><strong>Perfil económico:</strong> ingreso medio de ${moneyBoth(ing,2)}, gasto medio de ${moneyBoth(gas,2)} y ahorro medio de ${moneyBoth(aho,2)}. El ${pctText(pctSiempre,1)} siempre presupuesta y el ${pctText(pctNunca,1)} nunca lo hace.</p>
+    <p><strong>Relación ingreso–ahorro:</strong> r = ${r.r===null?'—':fmtNum(r.r,3)} (${interpretR(r.r)}), con ${regTxt}. ${r.p===null?'No hay valor p disponible.':`El contraste de correlación arroja p = ${fmtP(r.p)}.`}</p>
+    <p><strong>Asociación facultad–uso de presupuesto:</strong> ${chiTxt}. Recuerda revisar las frecuencias esperadas antes de aceptar la aproximación chi-cuadrado.</p>
+    <p><strong>Lectura crítica:</strong> los resultados son descriptivos y corresponden a datos sintéticos. No prueban causalidad ni permiten generalizar a una población real.</p>`;
+}
+
+/* =========================================================
+   4. GRÁFICOS NATIVOS EN CANVAS
+   ========================================================= */
+function chartTheme(){
+  const cs = getComputedStyle(document.documentElement);
+  const v = (name, fallback) => (cs.getPropertyValue(name).trim() || fallback);
+  const blue = v('--chart-blue','#245B70');
+  const green = v('--chart-green','#6B9B83');
+  return {
+    grid: v('--border','#E2E8F0'),
+    text: v('--muted','#64748B'),
+    label: v('--text','#263238'),
+    axis: v('--muted','#94A3B8'),
+    card: v('--card','#FFFFFF'),
+    blue, green,
+    palette: [blue, green, '#C9A24B', '#7FA6B5', '#9BBFA9', '#D4B36A', '#527D68']
+  };
+}
+
+function prepareCanvas(canvas){
+  const cssW = canvas.clientWidth || 900;
+  const w = Math.max(320, Math.min(1400, Math.round(cssW)));
+  const h = Math.max(230, Math.round(w / 2.25));
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)){
+    canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+  }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  ctx.font = '12px "Segoe UI", Roboto, Arial, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  return {ctx,w,h};
+}
+function drawMessage(canvas, text){
+  const {ctx,w,h} = prepareCanvas(canvas);
+  ctx.fillStyle = chartTheme().text;
+  ctx.font = '14px "Segoe UI", Roboto, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, w/2, h/2);
+  ctx.textAlign = 'left';
+}
+function niceCeil(v){
+  if(!(v > 0)) return 1;
+  const exp = Math.floor(Math.log10(v));
+  const f = v / Math.pow(10,exp);
+  let nf;
+  if(f <= 1) nf = 1; else if(f <= 2) nf = 2; else if(f <= 5) nf = 5; else nf = 10;
+  return nf * Math.pow(10,exp);
+}
+function axisTick(v, meta){
+  if(meta && meta.money){
+    if(Math.abs(v) >= 1000) return fmtNum(v/1000, (v % 1000 === 0) ? 0 : 1) + 'k';
+    return fmtNum(v,0);
+  }
+  if(meta && meta.unit === 'años') return fmtNum(v,0);
+  return fmtNum(v,0);
+}
+function truncateLabel(s, max = 24){
+  s = String(s);
+  return s.length > max ? s.slice(0, max-1) + '…' : s;
+}
+function drawBarChart(canvas, rows, meta){
+  if(!rows || !rows.length || rows.every(r=>r.f===0)){ drawMessage(canvas,'Sin datos para los filtros actuales'); return; }
+  const {ctx,w,h} = prepareCanvas(canvas);
+  const theme = chartTheme();
+  const L=64, R=22, T=24, B=94;
+  const plotW=w-L-R, plotH=h-T-B, bottom=T+plotH;
+  const maxF = Math.max(...rows.map(r=>r.f),1);
+  const yMax = niceCeil(maxF);
+  ctx.strokeStyle=theme.grid; ctx.lineWidth=1; ctx.fillStyle=theme.text; ctx.textAlign='right'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y = bottom - (plotH*i/5);
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(L+plotW,y); ctx.stroke();
+    ctx.fillText(fmtNum(yMax*i/5, (yMax*i/5)%1===0?0:1), L-8, y);
+  }
+  const slot = plotW / rows.length;
+  const barW = Math.min(72, slot*0.62);
+  ctx.font='11px "Segoe UI", Arial, sans-serif';
+  rows.forEach((r,i)=>{
+    const x = L + i*slot + (slot-barW)/2;
+    const barH = (r.f/yMax)*plotH;
+    const y = bottom-barH;
+    ctx.fillStyle = theme.palette[i % theme.palette.length];
+    ctx.fillRect(x,y,barW,barH);
+    if(r.f>0){
+      ctx.fillStyle=theme.blue; ctx.textAlign='center'; ctx.font='700 11px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(String(r.f), x+barW/2, y-10);
+    }
+  });
+  ctx.textAlign='right'; ctx.fillStyle=theme.label; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  rows.forEach((r,i)=>{
+    const cx = L + i*slot + slot/2;
+    ctx.save(); ctx.translate(cx, bottom+10); ctx.rotate(-Math.PI/5);
+    ctx.fillText(truncateLabel(r.label,22),0,0); ctx.restore();
+  });
+  ctx.strokeStyle=theme.axis; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,bottom); ctx.lineTo(L+plotW,bottom); ctx.stroke();
+  ctx.fillStyle=theme.text; ctx.textAlign='left'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  ctx.fillText('Frecuencia absoluta (n.º de estudiantes)', L, 12);
+}
+
+function drawHistogram(canvas, grouped){
+  if(!grouped || !grouped.rows || !grouped.rows.length || grouped.rows.every(r=>r.f===0)){ drawMessage(canvas,'Sin datos para los filtros actuales'); return; }
+  const {ctx,w,h} = prepareCanvas(canvas);
+  const theme = chartTheme();
+  const L=64,R=22,T=24,B=96;
+  const plotW=w-L-R, plotH=h-T-B, bottom=T+plotH;
+  const maxF=Math.max(...grouped.rows.map(r=>r.f),1);
+  const yMax=niceCeil(maxF);
+  ctx.strokeStyle=theme.grid; ctx.lineWidth=1; ctx.fillStyle=theme.text; ctx.textAlign='right'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y=bottom-(plotH*i/5);
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(L+plotW,y); ctx.stroke();
+    ctx.fillText(fmtNum(yMax*i/5,(yMax*i/5)%1===0?0:1), L-8, y);
+  }
+  const slot=plotW/grouped.rows.length, barW=slot*0.70;
+  const centers=[];
+  grouped.rows.forEach((r,i)=>{
+    const x=L+i*slot+(slot-barW)/2;
+    const barH=(r.f/yMax)*plotH;
+    const y=bottom-barH;
+    ctx.globalAlpha=.85; ctx.fillStyle=theme.blue;
+    ctx.fillRect(x,y,barW,barH); ctx.globalAlpha=1;
+    centers.push({x:L+i*slot+slot/2, y:bottom-(r.f/yMax)*plotH, f:r.f});
+  });
+  ctx.strokeStyle=theme.green; ctx.lineWidth=2.5; ctx.beginPath();
+  centers.forEach((p,i)=>{ if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); });
+  ctx.stroke();
+  centers.forEach(p=>{ ctx.fillStyle=theme.green; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=theme.card; ctx.lineWidth=1.2; ctx.stroke(); });
+  ctx.fillStyle=theme.label; ctx.textAlign='right'; ctx.font='10px "Segoe UI", Arial, sans-serif';
+  grouped.rows.forEach((r,i)=>{
+    const cx=L+i*slot+slot/2;
+    ctx.save(); ctx.translate(cx,bottom+10); ctx.rotate(-Math.PI/5);
+    ctx.fillText(`${boundText(r.lo,grouped.step)}–${boundText(r.hi,grouped.step)}`,0,0); ctx.restore();
+  });
+  ctx.strokeStyle=theme.axis; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,bottom); ctx.lineTo(L+plotW,bottom); ctx.stroke();
+  ctx.fillStyle=theme.text; ctx.textAlign='left'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  ctx.fillText('Frecuencia absoluta (n.º de estudiantes)', L, 12);
+}
+
+function drawPie(canvas, rows, meta){
+  const active = (rows||[]).filter(r=>r.f>0);
+  if(!active.length){ drawMessage(canvas,'Sin datos para los filtros actuales'); return; }
+  const {ctx,w,h} = prepareCanvas(canvas);
+  const theme = chartTheme();
+  const total = active.reduce((s,r)=>s+r.f,0);
+  const compact = w < 680;
+  const cx = compact ? w * 0.27 : Math.min(260, w * 0.25);
+  const cy = h * 0.52;
+  const radius = Math.min(compact ? w * 0.17 : 118, h * 0.34);
+  const legendX = compact ? w * 0.50 : Math.min(470, w * 0.48);
+  let ly = Math.max(42, h * 0.16);
+  const lineH = compact ? 26 : 30;
+  let start=-Math.PI/2;
+  active.forEach((r,i)=>{
+    const angle=(r.f/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,radius,start,start+angle); ctx.closePath();
+    ctx.fillStyle=theme.palette[i%theme.palette.length]; ctx.fill();
+    ctx.strokeStyle=theme.card; ctx.lineWidth=2; ctx.stroke();
+    const pctVal=(r.f/total)*100;
+    if(pctVal>=6){
+      const mid=start+angle/2;
+      ctx.fillStyle='#fff'; ctx.font='700 12px "Segoe UI", Arial, sans-serif'; ctx.textAlign='center';
+      ctx.fillText(fmtNum(pctVal,1)+'%', cx+Math.cos(mid)*radius*0.63, cy+Math.sin(mid)*radius*0.63);
+    }
+    start+=angle;
+  });
+  ctx.textAlign='left';
+  active.forEach((r,i)=>{
+    ctx.fillStyle=theme.palette[i%theme.palette.length]; ctx.fillRect(legendX,ly-7,12,12);
+    ctx.fillStyle=theme.label; ctx.font='600 12px "Segoe UI", Arial, sans-serif';
+    ctx.fillText(truncateLabel(r.label,compact?20:25),legendX+22,ly);
+    ctx.fillStyle=theme.text; ctx.font='11px "Segoe UI", Arial, sans-serif';
+    ctx.fillText(`${r.f} (${fmtNum((r.f/total)*100,1)} %)`,legendX+22,ly+15);
+    ly+=lineH;
+  });
+  ctx.fillStyle=theme.text; ctx.font='11px "Segoe UI", Arial, sans-serif'; ctx.textAlign='center';
+  ctx.fillText(`n = ${total}`, cx, cy+radius+22);
+}
+
+function drawScatterChart(canvas, data, keyX, keyY){
+  if(keyX === keyY){ drawMessage(canvas,'Selecciona dos variables distintas'); return; }
+  const pairs = (data||[]).map(d=>[d[keyX],d[keyY]]).filter(([x,y])=>Number.isFinite(x)&&Number.isFinite(y));
+  if(pairs.length < 3){ drawMessage(canvas,'Se necesitan al menos 3 pares de datos para el dispersograma'); return; }
+  const {ctx,w,h}=prepareCanvas(canvas);
+  const theme=chartTheme();
+  const L=74,R=24,T=24,B=62;
+  const plotW=w-L-R, plotH=h-T-B, bottom=T+plotH;
+  const xs=pairs.map(p=>p[0]), ys=pairs.map(p=>p[1]);
+  let xmin=Math.min(...xs), xmax=Math.max(...xs), ymin=Math.min(...ys), ymax=Math.max(...ys);
+  let xr=xmax-xmin, yr=ymax-ymin;
+  if(xr===0){ xmin-=1; xmax+=1; xr=2; }
+  if(yr===0){ ymin-=1; ymax+=1; yr=2; }
+  const px=xr*0.06, py=yr*0.07;
+  xmin-=px; xmax+=px; ymin-=py; ymax+=py;
+  const sx = v => L + (v-xmin)/(xmax-xmin)*plotW;
+  const sy = v => bottom - (v-ymin)/(ymax-ymin)*plotH;
+  const metaX=VARS[keyX], metaY=VARS[keyY];
+  ctx.strokeStyle=theme.grid; ctx.lineWidth=1; ctx.fillStyle=theme.text; ctx.textAlign='right'; ctx.font='10px "Segoe UI", Arial, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y=bottom-(plotH*i/5), x=L+(plotW*i/5);
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(L+plotW,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,T); ctx.lineTo(x,bottom); ctx.stroke();
+    ctx.fillText(axisTick(ymin+(ymax-ymin)*i/5,metaY), L-8, y);
+    ctx.textAlign='center'; ctx.fillText(axisTick(xmin+(xmax-xmin)*i/5,metaX), x, bottom+14); ctx.textAlign='right';
+  }
+  ctx.strokeStyle=theme.axis; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,bottom); ctx.lineTo(L+plotW,bottom); ctx.stroke();
+  const reg=computeRegression(data,keyX,keyY);
+  if(reg.model){
+    ctx.save(); ctx.beginPath(); ctx.rect(L,T,plotW,plotH); ctx.clip();
+    const y1=reg.model.intercept+reg.model.slope*xmin;
+    const y2=reg.model.intercept+reg.model.slope*xmax;
+    ctx.strokeStyle=theme.green; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(sx(xmin),sy(y1)); ctx.lineTo(sx(xmax),sy(y2)); ctx.stroke();
+    ctx.restore();
+  }
+  pairs.forEach(([x,y])=>{
+    ctx.beginPath(); ctx.arc(sx(x),sy(y),3.4,0,Math.PI*2);
+    ctx.globalAlpha=.62; ctx.fillStyle=theme.blue; ctx.fill(); ctx.globalAlpha=1;
+    ctx.globalAlpha=.75; ctx.strokeStyle=theme.card; ctx.lineWidth=.8; ctx.stroke(); ctx.globalAlpha=1;
+  });
+  ctx.fillStyle=theme.text; ctx.textAlign='center'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  const xUnit=metaX.money?' (C$)':(metaX.unit?' ('+metaX.unit+')':'');
+  const yUnit=metaY.money?' (C$)':(metaY.unit?' ('+metaY.unit+')':'');
+  ctx.fillText(metaX.label+xUnit, L+plotW/2, h-16);
+  ctx.save(); ctx.translate(14,T+plotH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(metaY.label+yUnit,0,0); ctx.restore();
+  ctx.textAlign='right'; ctx.fillStyle=theme.text; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  ctx.fillText(`n = ${pairs.length}`, L+plotW, 12);
+}
+
+function drawSavingsByGroup(canvas, groups, meta){
+  if(!groups || !groups.length){ drawMessage(canvas,'Sin datos para los filtros actuales'); return; }
+  const {ctx,w,h}=prepareCanvas(canvas);
+  const theme=chartTheme();
+  const L=68,R=24,T=26,B=92;
+  const plotW=w-L-R, plotH=h-T-B, bottom=T+plotH;
+  const maxV=Math.max(...groups.map(g=>g.mean),1);
+  const yMax=niceCeil(maxV);
+  ctx.strokeStyle=theme.grid; ctx.lineWidth=1; ctx.fillStyle=theme.text; ctx.textAlign='right'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y=bottom-(plotH*i/5);
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(L+plotW,y); ctx.stroke();
+    ctx.fillText(fmtNum(yMax*i/5,0),L-8,y);
+  }
+  const slot=plotW/groups.length, barW=Math.min(82,slot*0.58);
+  groups.forEach((g,i)=>{
+    const x=L+i*slot+(slot-barW)/2;
+    const barH=(g.mean/yMax)*plotH, y=bottom-barH;
+    ctx.fillStyle=theme.palette[i%theme.palette.length];
+    ctx.fillRect(x,y,barW,barH);
+    ctx.fillStyle=theme.blue; ctx.textAlign='center'; ctx.font='700 10px "Segoe UI", Arial, sans-serif';
+    ctx.fillText(fmtNum(g.mean,0),x+barW/2,y-10);
+  });
+  ctx.fillStyle=theme.label; ctx.textAlign='right'; ctx.font='10px "Segoe UI", Arial, sans-serif';
+  groups.forEach((g,i)=>{
+    const cx=L+i*slot+slot/2;
+    ctx.save(); ctx.translate(cx,bottom+10); ctx.rotate(-Math.PI/5);
+    ctx.fillText(truncateLabel(g.label,22),0,0); ctx.restore();
+  });
+  ctx.strokeStyle=theme.axis; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,bottom); ctx.lineTo(L+plotW,bottom); ctx.stroke();
+  ctx.fillStyle=theme.text; ctx.textAlign='left'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  ctx.fillText('Ahorro promedio (C$ por mes)',L,13);
+}
+
+function drawIncomeExpense(canvas, data){
+  const byArea = AREA_NAMES.map(area=>{
+    const rows=data.filter(d=>d.area===area);
+    return {area, n:rows.length, ing:rows.length?mean(rows.map(r=>r.ingreso)):0, gas:rows.length?mean(rows.map(r=>r.gastoTotal)):0};
+  }).filter(g=>g.n>0);
+  if(!byArea.length){ drawMessage(canvas,'Sin datos para los filtros actuales'); return; }
+  const {ctx,w,h}=prepareCanvas(canvas);
+  const theme=chartTheme();
+  const L=68,R=24,T=30,B=94;
+  const plotW=w-L-R, plotH=h-T-B, bottom=T+plotH;
+  const maxV=Math.max(...byArea.flatMap(g=>[g.ing,g.gas]),1);
+  const yMax=niceCeil(maxV);
+  ctx.strokeStyle=theme.grid; ctx.lineWidth=1; ctx.fillStyle=theme.text; ctx.textAlign='right'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y=bottom-(plotH*i/5);
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(L+plotW,y); ctx.stroke();
+    ctx.fillText(fmtNum(yMax*i/5,0),L-8,y);
+  }
+  const slot=plotW/byArea.length, groupW=slot*0.60, barW=groupW/2;
+  byArea.forEach((g,i)=>{
+    const base=L+i*slot+(slot-groupW)/2;
+    [['ing',g.ing,theme.blue],['gas',g.gas,theme.green]].forEach(([kind,val,color],j)=>{
+      const barH=(val/yMax)*plotH, x=base+j*barW, y=bottom-barH;
+      ctx.fillStyle=color; ctx.fillRect(x,y,barW,barH);
+      ctx.fillStyle=theme.label; ctx.textAlign='center'; ctx.font='9px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(fmtNum(val,0),x+barW/2,y-7);
+    });
+  });
+  ctx.fillStyle=theme.label; ctx.textAlign='right'; ctx.font='10px "Segoe UI", Arial, sans-serif';
+  byArea.forEach((g,i)=>{
+    const cx=L+i*slot+slot/2;
+    ctx.save(); ctx.translate(cx,bottom+10); ctx.rotate(-Math.PI/5);
+    ctx.fillText(truncateLabel(g.area,24),0,0); ctx.restore();
+  });
+  ctx.strokeStyle=theme.axis; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,bottom); ctx.lineTo(L+plotW,bottom); ctx.stroke();
+  ctx.fillStyle=theme.text; ctx.textAlign='left'; ctx.font='11px "Segoe UI", Arial, sans-serif';
+  ctx.fillText('Promedio mensual (C$)',L,14);
+}
+
+function savingsByGroup(key){
+  const meta=VARS[key];
+  const values=meta.order?[...meta.order]:[...new Set(state.filtered.map(d=>d[key]))].sort();
+  return values.map(v=>{
+    const rows=state.filtered.filter(d=>String(d[key])===String(v));
+    return {value:v,label:qualLabel(key,v),n:rows.length,mean:rows.length?mean(rows.map(r=>r.ahorro)):0};
+  }).filter(g=>g.n>0);
+}
+
+function renderCharts(){
+  const d=state.filtered;
+  const barDist=getQualDist(state.chartBarVar);
+  drawBarChart($('chartBars'), barDist.rows, barDist.meta);
+  const topBar=[...barDist.rows].sort((a,b)=>b.f-a.f)[0];
+  $('barInterp').innerHTML = barDist.n && topBar && topBar.f ? `<h4>¿Cómo se interpreta?</h4><p>La categoría más frecuente de <strong>${escapeHtml(barDist.meta.label.toLowerCase())}</strong> es <strong>${escapeHtml(topBar.label)}</strong>, con ${topBar.f} estudiantes (${pctText(topBar.pct,1)}). La altura de cada barra representa la frecuencia absoluta y el eje vertical está en número de estudiantes.</p>` : '<h4>¿Cómo se interpreta?</h4><p>No hay datos suficientes para construir el gráfico de barras con los filtros actuales.</p>';
+
+  const grouped=getGrouped(state.chartHistVar);
+  drawHistogram($('chartHist'), grouped);
+  if(grouped.n){
+    const modal=grouped.rows.reduce((a,b)=>b.f>a.f?b:a,grouped.rows[0]);
+    const st=describe(numericValues(state.chartHistVar));
+    $('histInterp').innerHTML=`<h4>¿Cómo se interpreta?</h4><p>La mayor frecuencia se concentra en el intervalo <strong>${boundText(modal.lo,grouped.step)}–${boundText(modal.hi,grouped.step)}</strong>, con ${modal.f} estudiantes (${pctText(modal.pct,1)}). La línea del polígono une las marcas de clase y ayuda a visualizar el perfil de la distribución. La media es ${fmtValue(st.mean,state.chartHistVar,2)} y la mediana es ${fmtValue(st.median,state.chartHistVar,2)}.</p>`;
+  } else {
+    $('histInterp').innerHTML='<h4>¿Cómo se interpreta?</h4><p>No hay datos suficientes para construir el histograma con los filtros actuales.</p>';
+  }
+
+  const pieDist=getQualDist(state.chartPieVar);
+  drawPie($('chartPie'), pieDist.rows, pieDist.meta);
+  const topPie=[...pieDist.rows].sort((a,b)=>b.f-a.f)[0];
+  $('pieInterp').innerHTML = pieDist.n && topPie && topPie.f ? `<h4>¿Cómo se interpreta?</h4><p>La mayor participación corresponde a <strong>${escapeHtml(topPie.label)}</strong>, con ${topPie.f} estudiantes (${pctText(topPie.pct,1)} del total). El gráfico circular muestra la composición de una sola variable categórica; es adecuado para comparar proporciones, pero con muestras pequeñas los porcentajes pueden cambiar mucho entre muestras.</p>` : '<h4>¿Cómo se interpreta?</h4><p>No hay datos suficientes para construir el gráfico circular con los filtros actuales.</p>';
+
+  const scX=state.chartScatterX, scY=state.chartScatterY;
+  drawScatterChart($('chartScatter'), d, scX, scY);
+  if(scX===scY){
+    $('scatterInterp').innerHTML='<h4>¿Cómo se interpreta?</h4><p>Selecciona dos variables cuantitativas distintas para visualizar la dispersión y la recta de regresión.</p>';
+  } else {
+    const p=computePearson(d,scX,scY);
+    $('scatterInterp').innerHTML = p.r===null ? '<h4>¿Cómo se interpreta?</h4><p>No hay suficientes pares con variabilidad para calcular la tendencia lineal.</p>' : `<h4>¿Cómo se interpreta?</h4><p>Cada punto representa un estudiante según <strong>${escapeHtml(VARS[scX].label.toLowerCase())}</strong> (eje X) y <strong>${escapeHtml(VARS[scY].label.toLowerCase())}</strong> (eje Y). La nube de puntos muestra una ${interpretR(p.r)} (r = ${fmtNum(p.r,3)}). La recta verde es la estimación de mínimos cuadrados; si los puntos se alejan mucho de ella, el modelo lineal resume poco la relación.</p>`;
+  }
+
+  const groups=savingsByGroup(state.chartGroupVar);
+  drawSavingsByGroup($('chartSavings'), groups, VARS[state.chartGroupVar]);
+  if(groups.length){
+    const sorted=[...groups].sort((a,b)=>b.mean-a.mean);
+    const hi=sorted[0], lo=sorted[sorted.length-1];
+    $('savingsInterp').innerHTML=`<h4>¿Cómo se interpreta?</h4><p>El mayor ahorro promedio se observa en <strong>${escapeHtml(hi.label)}</strong> (${moneyBoth(hi.mean,2)}, n = ${hi.n})${lo!==hi?`; el menor, en <strong>${escapeHtml(lo.label)}</strong> (${moneyBoth(lo.mean,2)}, n = ${lo.n})`:''}. Las barras comparan promedios, no personas individuales: dentro de cada grupo hay variabilidad y el tamaño de cada submuestra importa. Una diferencia descriptiva no implica causalidad.</p>`;
+  } else {
+    $('savingsInterp').innerHTML='<h4>¿Cómo se interpreta?</h4><p>No hay grupos con datos suficientes para comparar el ahorro promedio.</p>';
+  }
+
+  drawIncomeExpense($('chartIncomeExpense'), d);
+  if(d.length){
+    const areas=AREA_NAMES.map(area=>{const rows=d.filter(x=>x.area===area);return {area,n:rows.length,ing:rows.length?mean(rows.map(r=>r.ingreso)):0,gas:rows.length?mean(rows.map(r=>r.gastoTotal)):0};}).filter(g=>g.n>0);
+    const totalIng=mean(d.map(x=>x.ingreso)), totalGas=mean(d.map(x=>x.gastoTotal));
+    const ratio=pct(totalGas,totalIng);
+    const widest=[...areas].sort((a,b)=>Math.abs(b.ing-b.gas)-Math.abs(a.ing-a.gas))[0];
+    $('incExpInterp').innerHTML=`<h4>¿Cómo se interpreta?</h4><p>En el conjunto visible, el gasto promedio representa el <strong>${pctText(ratio,1)}</strong> del ingreso promedio. ${widest?`La facultad con mayor brecha absoluta entre ingreso y gasto es <strong>${escapeHtml(widest.area)}</strong> (${moneyBoth(widest.ing,2)} vs. ${moneyBoth(widest.gas,2)}).`:''} Las barras comparan promedios por facultad; no muestran la dispersión interna ni permiten concluir que la facultad cause diferencias económicas.</p>`;
+  } else {
+    $('incExpInterp').innerHTML='<h4>¿Cómo se interpreta?</h4><p>No hay datos para comparar ingreso y gasto por facultad.</p>';
+  }
+}
+
+/* =========================================================
+   5. ORQUESTACIÓN, EVENTOS, CSV E INICIALIZACIÓN
+   ========================================================= */
+function renderAll(){
+  applyFilters();
+  renderHome();
+  renderDatabase();
+  renderQualFrequency();
+  renderQuantFrequency();
+  renderDescriptive();
+  renderChiSquare();
+  renderCorrelation();
+  renderRegression();
+  renderCharts();
+  renderFinalSummary();
+}
+
+let toastTimer = null;
+function toast(message){
+  const el = $('toast');
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+function drawActiveCharts(){
+  const active = document.querySelector('.section.active');
+  if(!active) return;
+  if(active.id === 'graficos') renderCharts();
+  else if(active.id === 'pruebas'){ renderCorrelation(); renderRegression(); }
+  else if(active.id === 'regresion') renderRegression();
+}
+function showSection(id){
+  const target = document.getElementById(id);
+  if(!target) return;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  target.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === id));
+  if(history.replaceState) history.replaceState(null, '', '#' + id);
+  window.scrollTo(0,0);
+  drawActiveCharts();
+}
+
+function downloadCSV(){
+  const d = state.filtered;
+  if(!d.length){ toast('No hay registros visibles para exportar.'); return; }
+  const moneyCols = DATA_COLUMNS.filter(c => VARS[c.key] && VARS[c.key].money);
+  const head = DATA_COLUMNS.map(c => `"${c.label}"`).concat(moneyCols.map(c => `"${c.label.replace(/\s*\(C\$\)/,'')} (US$)"`)).join(',');
+  const body = d.map(row => DATA_COLUMNS.map(c => {
+    const v = row[c.key];
+    return `"${String(v === null || v === undefined ? '' : v).replace(/"/g,'""')}"`;
+  }).concat(moneyCols.map(c => {
+    const v = row[c.key];
+    return `"${Number.isFinite(v) ? (v / CDF_PER_USD).toFixed(2) : ''}"`;
+  })).join(',')).join('\r\n');
+  const blob = new Blob(['\ufeff' + head + '\r\n' + body], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'presupuesto_universitario.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast(`CSV exportado con ${d.length} registros visibles.`);
+}
+
+function resetPrediction(){
+  $('predX').value = '';
+  $('predResult').classList.add('hidden');
+  $('predResult').classList.remove('warn');
+  const values = numericValues(state.regX);
+  if(values.length){
+    const med = quantileSorted([...values].sort((a,b)=>a-b), .5);
+    $('predX').value = String(Math.round(med * 100) / 100);
+    updatePrediction();
+  }
+}
+
+const THEME_KEY = 'presupuesto-tema';
+function currentTheme(){
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+}
+function syncThemeUI(){
+  const dark = currentTheme() === 'dark';
+  const btn = $('themeToggle');
+  if(btn){
+    btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    btn.title = dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+  }
+  const icon = $('themeIcon'), label = $('themeLabel');
+  if(icon) icon.textContent = dark ? '☀️' : '🌙';
+  if(label) label.textContent = dark ? 'Modo claro' : 'Modo oscuro';
+  const meta = $('themeColorMeta');
+  if(meta) meta.setAttribute('content', dark ? '#102A34' : '#245B70');
+}
+function setTheme(theme, persist = true){
+  if(theme === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  if(persist){
+    try{ localStorage.setItem(THEME_KEY, theme === 'dark' ? 'oscuro' : 'claro'); }catch(e){}
+  }
+  syncThemeUI();
+  requestAnimationFrame(drawActiveCharts);
+}
+let printWasDark = false;
+function preparePrint(){
+  printWasDark = currentTheme() === 'dark';
+  if(printWasDark){
+    document.documentElement.removeAttribute('data-theme');
+    drawActiveCharts();
+  }
+}
+function restoreAfterPrint(){
+  if(!printWasDark) return;
+  document.documentElement.setAttribute('data-theme','dark');
+  printWasDark = false;
+  syncThemeUI();
+  requestAnimationFrame(drawActiveCharts);
+}
+
+function bindEvents(){
+  document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
+  document.querySelectorAll('[data-goto]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.goto)));
+  $('themeToggle').addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
+  window.addEventListener('beforeprint', preparePrint);
+  window.addEventListener('afterprint', restoreAfterPrint);
+
+  $('searchInput').addEventListener('input', e => { state.filters.search = e.target.value; renderAll(); });
+  $('filterArea').addEventListener('change', e => { state.filters.area = e.target.value; renderAll(); });
+  $('filterBudget').addEventListener('change', e => { state.filters.budget = e.target.value; renderAll(); });
+  $('filterSource').addEventListener('change', e => { state.filters.source = e.target.value; renderAll(); });
+  $('btnResetFilters').addEventListener('click', () => {
+    state.filters = {search:'',area:'',budget:'',source:''};
+    syncFilterControls(); renderAll(); toast('Filtros restablecidos.');
+  });
+  $('btnCsv').addEventListener('click', downloadCSV);
+  $('btnPrintHome').addEventListener('click', () => window.print());
+  $('btnPrintDb').addEventListener('click', () => window.print());
+  $('btnPrintAll').addEventListener('click', () => window.print());
+
+  $('qualVarSelect').addEventListener('change', e => { state.qualVar = e.target.value; renderQualFrequency(); });
+  $('quantVarSelect').addEventListener('change', e => { state.quantVar = e.target.value; renderQuantFrequency(); });
+  $('descVarSelect').addEventListener('change', e => { state.descVar = e.target.value; renderDescriptive(); });
+  $('chiA').addEventListener('change', e => { state.chiA = e.target.value; renderChiSquare(); });
+  $('chiB').addEventListener('change', e => { state.chiB = e.target.value; renderChiSquare(); });
+  $('corrX').addEventListener('change', e => { state.corrX = e.target.value; renderCorrelation(); });
+  $('corrY').addEventListener('change', e => { state.corrY = e.target.value; renderCorrelation(); });
+  $('regX').addEventListener('change', e => { state.regX = e.target.value; renderRegression(); resetPrediction(); });
+  $('regY').addEventListener('change', e => { state.regY = e.target.value; renderRegression(); resetPrediction(); });
+  $('chartBarVar').addEventListener('change', e => { state.chartBarVar = e.target.value; renderCharts(); });
+  $('chartHistVar').addEventListener('change', e => { state.chartHistVar = e.target.value; renderCharts(); });
+  $('chartPieVar').addEventListener('change', e => { state.chartPieVar = e.target.value; renderCharts(); });
+  $('chartScatterX').addEventListener('change', e => { state.chartScatterX = e.target.value; renderCharts(); });
+  $('chartScatterY').addEventListener('change', e => { state.chartScatterY = e.target.value; renderCharts(); });
+  $('chartGroupVar').addEventListener('change', e => { state.chartGroupVar = e.target.value; renderCharts(); });
+
+  $('predictionForm').addEventListener('submit', e => { e.preventDefault(); updatePrediction(); });
+  $('predX').addEventListener('input', () => { if($('predX').value.trim()) updatePrediction(); });
+
+  $('dataTable').querySelector('thead').addEventListener('click', e => {
+    const th = e.target.closest('th[data-key]');
+    if(!th) return;
+    const key = th.dataset.key;
+    if(state.sortKey === key) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+    else { state.sortKey = key; state.sortDir = 'asc'; }
+    sortFiltered();
+    renderDatabase();
+  });
+  $('dataTable').querySelector('thead').addEventListener('keydown', e => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const th = e.target.closest('th[data-key]');
+    if(!th) return;
+    e.preventDefault(); th.click();
+  });
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(drawActiveCharts, 160);
+  });
+}
+
+function init(){
+  state.data = fixedData();
+  populateSelects();
+  renderQuestionnaire();
+  bindEvents();
+  syncThemeUI();
+  syncFilterControls();
+  renderAll();
+  resetPrediction();
+  const hash = (location.hash || '').replace('#','');
+  if(hash && document.getElementById(hash) && document.querySelector('.nav-btn[data-section="'+hash+'"]')){
+    showSection(hash);
+    setTimeout(() => window.scrollTo(0,0), 220);
+  }
+}
+window.addEventListener('load', () => {
+  if(location.hash) setTimeout(() => window.scrollTo(0,0), 220);
+});
+init();
+</script>
+</body>
+</html>
